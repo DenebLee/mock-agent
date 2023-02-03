@@ -2,7 +2,6 @@ package nanoit.kr.repository;
 
 import nanoit.kr.db.DataBaseSessionManager;
 import nanoit.kr.domain.entity.SendEntity;
-import nanoit.kr.domain.message.MessageStatus;
 import nanoit.kr.exception.DeleteFailedException;
 import nanoit.kr.exception.SelectFailedException;
 import nanoit.kr.exception.UpdateFailedException;
@@ -31,7 +30,7 @@ public class SendMessageRepositoryImpl implements SendMessageRepository {
     @Override
     public long count() {
         try (SqlSession session = sessionManager.getSqlSession(true)) {
-            int count = session.selectOne("count");
+            int count = session.selectOne("send_count");
             if (count != 0) {
                 return count;
             }
@@ -44,7 +43,7 @@ public class SendMessageRepositoryImpl implements SendMessageRepository {
     @Override
     public boolean deleteAll() {
         try (SqlSession session = sessionManager.getSqlSession(true)) {
-            int result = session.delete("deleteAll");
+            int result = session.delete("send_deleteAll");
             if (result > 0) {
                 return true;
             } else if (result == 0) {
@@ -57,9 +56,9 @@ public class SendMessageRepositoryImpl implements SendMessageRepository {
     }
 
     @Override
-    public int updateMessageStatus(long id) {
+    public int updateMessageStatus(SendEntity sendEntity) {
         try (SqlSession session = sessionManager.getSqlSession(true)) {
-            int result = session.update("updateMessageStatus", id);
+            int result = session.update("send_updateMessageStatus", sendEntity);
             if (result > 0) {
                 return result;
             }
@@ -72,7 +71,7 @@ public class SendMessageRepositoryImpl implements SendMessageRepository {
     @Override
     public SendEntity selectById(long id) {
         try (SqlSession session = sessionManager.getSqlSession(true)) {
-            SendEntity sendEntity = session.selectOne("selectById", id);
+            SendEntity sendEntity = session.selectOne("send_selectById", id);
             if (sendEntity != null) {
                 return sendEntity;
             }
@@ -82,10 +81,15 @@ public class SendMessageRepositoryImpl implements SendMessageRepository {
         return null;
     }
 
+
+    // 최초 select 할때 마지막 id 기준으로 보다 큰 id 값 들 가져오도록
+    // status 가 null 인 것들
+
+    // 두개의 조건이면 뚫리지 않나?
     @Override
     public List<SendEntity> selectAll() {
         try (SqlSession session = sessionManager.getSqlSession(true)) {
-            List<SendEntity> selectList = session.selectList("selectAll");
+            List<SendEntity> selectList = session.selectList("send_selectAll");
             if (!selectList.isEmpty()) {
                 return selectList;
             }
@@ -93,5 +97,14 @@ public class SendMessageRepositoryImpl implements SendMessageRepository {
             throw new SelectFailedException("Failed to Select Send Messages => " + e.getMessage());
         }
         return null;
+    }
+
+    @Override
+    public boolean isAlive() {
+        try (SqlSession session = sessionManager.getSqlSession(true)) {
+            return session.selectOne("send_ping");
+        } catch (Exception e) {
+            throw new SelectFailedException("The Receive Table is not Created => " + e.getMessage());
+        }
     }
 }

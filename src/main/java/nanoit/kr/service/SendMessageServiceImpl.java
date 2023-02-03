@@ -14,9 +14,11 @@ import java.util.List;
 @Slf4j
 public class SendMessageServiceImpl implements SendMessageService {
     private final SendMessageRepository sendMessageRepository;
+    public boolean isCreateTable;
 
     public SendMessageServiceImpl(SendMessageRepository sendMessageRepository) {
         this.sendMessageRepository = sendMessageRepository;
+        isCreateTable = false;
     }
 
     @Override
@@ -34,9 +36,9 @@ public class SendMessageServiceImpl implements SendMessageService {
     }
 
     @Override
-    public boolean updateSendMessageStatus(long id) {
+    public boolean updateSendMessageStatus(SendEntity sendEntity) {
         try {
-            return sendMessageRepository.updateMessageStatus(id) > 0;
+            return sendMessageRepository.updateMessageStatus(sendEntity) > 0;
         } catch (UpdateFailedException e) {
             log.error(e.getReason());
         }
@@ -65,6 +67,6 @@ public class SendMessageServiceImpl implements SendMessageService {
 
     @Override
     public boolean isAlive() {
-        return false;
+        return sendMessageRepository.isAlive();
     }
 }

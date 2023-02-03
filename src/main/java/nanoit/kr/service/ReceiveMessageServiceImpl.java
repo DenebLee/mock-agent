@@ -12,9 +12,11 @@ import nanoit.kr.repository.ReceiveMessageRepository;
 public class ReceiveMessageServiceImpl implements ReceiveMessageService {
 
     private final ReceiveMessageRepository receiveMessageRepository;
+    public boolean isSettingCompleted;
 
     public ReceiveMessageServiceImpl(ReceiveMessageRepository receiveMessageRepository) {
         this.receiveMessageRepository = receiveMessageRepository;
+        isSettingCompleted = false;
     }
 
     @Override
@@ -47,7 +49,7 @@ public class ReceiveMessageServiceImpl implements ReceiveMessageService {
 
     @Override
     public boolean isAlive() {
-        return false;
+        return receiveMessageRepository.isAlive();
     }
 
 }

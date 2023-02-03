@@ -24,6 +24,9 @@ dependencies {
     implementation 'ch.qos.logback:logback-core:1.2.11'
     implementation 'ch.qos.logback:logback-access:1.2.11'
 
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.13.4.1'
+    implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.14.1'
+
 
     // TEST IMPLEMENTS
     testImplementation 'org.assertj:assertj-core:3.23.1'

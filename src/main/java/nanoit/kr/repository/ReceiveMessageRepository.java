@@ -36,7 +36,7 @@ public interface ReceiveMessageRepository {
 
     boolean insert(SendAckEntity sendAck);
 
-    boolean alive();
+    boolean isAlive();
 
 
 }

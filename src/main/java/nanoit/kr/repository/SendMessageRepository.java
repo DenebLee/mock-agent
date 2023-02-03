@@ -2,6 +2,7 @@ package nanoit.kr.repository;
 
 import nanoit.kr.domain.entity.SendEntity;
 import nanoit.kr.domain.message.MessageStatus;
+import nanoit.kr.domain.message.Send;
 import nanoit.kr.exception.SelectFailedException;
 
 import java.io.IOException;
@@ -18,11 +19,13 @@ public interface SendMessageRepository {
 
     boolean deleteAll();
 
-    int updateMessageStatus(long id);
+    int updateMessageStatus(SendEntity sendEntity);
 
     Object selectById(long id);
 
     List<SendEntity> selectAll() throws SelectFailedException;
+
+    boolean isAlive();
 
 }
 

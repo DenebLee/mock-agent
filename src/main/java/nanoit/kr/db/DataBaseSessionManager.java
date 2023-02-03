@@ -41,6 +41,9 @@ public class DataBaseSessionManager {
         configuration.setJdbcTypeForNull(JdbcType.VARCHAR);
         configuration.setCallSettersOnNulls(true);
 
+        // Camel case -> snake Case 자동 매핑
+        configuration.setMapUnderscoreToCamelCase(true);
+
         String[] mapperResources;
         if (properties.getProperty("mapper").contains(",")) {
             mapperResources = properties.getProperty("mapper").split(",");

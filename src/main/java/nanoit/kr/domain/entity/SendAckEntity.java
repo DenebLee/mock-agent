@@ -18,7 +18,7 @@ public class SendAckEntity {
     private long id;
     private MessageResult result;
     private Timestamp createdAt;
-    private Timestamp modifiedAt;
+    private Timestamp lastModifiedAt;
 
     public SendAck toDto() {
         return new SendAck(result);

@@ -1,6 +1,5 @@
 package nanoit.kr.repository;
 
-import ch.qos.logback.core.encoder.EchoEncoder;
 import nanoit.kr.db.DataBaseSessionManager;
 import nanoit.kr.domain.entity.SendAckEntity;
 import nanoit.kr.exception.DeleteFailedException;
@@ -18,20 +17,33 @@ public class ReceiveMessageRepositoryImpl implements ReceiveMessageRepository {
 
     public ReceiveMessageRepositoryImpl(Properties properties) throws IOException {
         this.sessionManager = new DataBaseSessionManager(properties);
+        settingPreferences();
+    }
 
+    private void settingPreferences() {
+        try (SqlSession session = sessionManager.getSqlSession(true)) {
+            session.update("createReceiveTable");
+            session.update("createResultTable");
+            session.update("foreignKeySet");
+            session.insert("receive_insertResult");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public long count() {
         try (SqlSession session = sessionManager.getSqlSession(true)) {
-            return session.selectOne("count");
+            return session.selectOne("receive_count");
+        } catch (Exception e) {
+            throw new SelectFailedException("Failed to Total count lookup failed => " + e.getMessage());
         }
     }
 
     @Override
     public boolean deleteById(long messageId) {
         try (SqlSession session = sessionManager.getSqlSession(true)) {
-            int result = session.delete("deleteById");
+            int result = session.delete("receive_deleteById", messageId);
             if (result == 1) {
                 return true;
             } else if (result < 1) {
@@ -46,7 +58,7 @@ public class ReceiveMessageRepositoryImpl implements ReceiveMessageRepository {
     @Override
     public boolean deleteAll() {
         try (SqlSession session = sessionManager.getSqlSession(true)) {
-            int result = session.delete("deleteAll");
+            int result = session.delete("receive_deleteAll");
             if (result > 0) {
                 return true;
             } else if (result == 0) {
@@ -61,7 +73,7 @@ public class ReceiveMessageRepositoryImpl implements ReceiveMessageRepository {
     @Override
     public List<SendAckEntity> selectAll() throws SelectFailedException {
         try (SqlSession session = sessionManager.getSqlSession(true)) {
-            List<SendAckEntity> listData = session.selectList("selectAll");
+            List<SendAckEntity> listData = session.selectList("receive_selectAll");
             if (!listData.isEmpty()) {
                 return listData;
             }
@@ -75,7 +87,7 @@ public class ReceiveMessageRepositoryImpl implements ReceiveMessageRepository {
     @Override
     public boolean insert(SendAckEntity sendAck) {
         try (SqlSession session = sessionManager.getSqlSession(true)) {
-            int result = session.insert("insert", sendAck);
+            int result = session.insert("receive_insert", sendAck);
             if (result > 0) {
                 return true;
             } else if (result == 0) {
@@ -88,10 +100,11 @@ public class ReceiveMessageRepositoryImpl implements ReceiveMessageRepository {
     }
 
     @Override
-    public boolean alive() {
+    public boolean isAlive() {
         try (SqlSession session = sessionManager.getSqlSession(true)) {
-
+            return session.selectOne("receive_ping");
+        } catch (Exception e) {
+            throw new SelectFailedException("The Receive Table is not Created => " + e.getMessage());
         }
-        return false;
     }
 }

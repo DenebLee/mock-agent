@@ -22,7 +22,7 @@ public class SendEntity {
     private String name;
     private String content;
     private Timestamp createdAt;
-    private Timestamp modifiedAt;
+    private Timestamp lastModifiedAt;
 
     public Send toDto() {
         return new Send(id, phoneNum, callback, name, content);
