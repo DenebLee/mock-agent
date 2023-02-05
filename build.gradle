@@ -14,6 +14,7 @@ repositories {
 
 dependencies {
     implementation 'org.projectlombok:lombok:1.18.24'
+    implementation 'org.junit.jupiter:junit-jupiter:5.8.1'
     compileOnly 'org.projectlombok:lombok:1.18.24'
     annotationProcessor 'org.projectlombok:lombok:1.18.24'
     implementation group: 'com.google.guava', name: 'guava', version: '31.1-jre'
@@ -65,6 +66,11 @@ sourceSets {
     main {
         resources {
             srcDir "./config/"
+            srcDir "./mapper/"
+        }
+    }
+    test {
+        resources {
             srcDir "./mapper/"
         }
     }

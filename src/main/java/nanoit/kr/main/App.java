@@ -52,6 +52,7 @@ public class App {
                 DataBaseScheduler dataBaseScheduler = new DataBaseScheduler(sendMessageService, queue);
 
                 // 스케쥴러에서는 select 된 메시지들 send_queue 에 담고 공유
+                // Queue 는 임시적으로 만들어서 테스트 -> 확인 필요
 
 
                 new ReceiveThread(getRandomUuid(), receivedMessageService, socket, queue);

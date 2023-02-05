@@ -25,6 +25,7 @@ public class ReceiveThread extends ModuleProcess {
         try {
             log.info("[RECEIVE- {}] THREAD START", uuid);
 
+
             // 인증 메시지를 보낸다음 authentication 성공 여부에 따라 루프문 실행?
             // 최초 실행시 start log , 인증 메시지 전송 , 최초 select 후 queue 에 담기
 
