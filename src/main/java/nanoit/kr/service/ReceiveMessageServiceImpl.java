@@ -43,6 +43,11 @@ public class ReceiveMessageServiceImpl implements ReceiveMessageService {
 
     @Override
     public boolean deleteAllReceiveMessage() {
+        try {
+            return receiveMessageRepository.deleteAll();
+        } catch (DeleteFailedException e) {
+            log.error(e.getReason());
+        }
         return false;
     }
 

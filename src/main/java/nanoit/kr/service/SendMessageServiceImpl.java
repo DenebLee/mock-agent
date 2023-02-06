@@ -2,6 +2,7 @@ package nanoit.kr.service;
 
 import lombok.extern.slf4j.Slf4j;
 import nanoit.kr.domain.entity.SendEntity;
+import nanoit.kr.domain.message.MessageStatus;
 import nanoit.kr.domain.message.Send;
 import nanoit.kr.exception.DeleteFailedException;
 import nanoit.kr.exception.SelectFailedException;
@@ -36,17 +37,21 @@ public class SendMessageServiceImpl implements SendMessageService {
     }
 
     @Override
-    public boolean updateSendMessageStatus(SendEntity sendEntity) {
+    public boolean updateSendMessageStatus(long id, MessageStatus messageStatus) {
         try {
+            SendEntity sendEntity = new SendEntity();
+            sendEntity.setStatus(messageStatus);
             return sendMessageRepository.updateMessageStatus(sendEntity);
         } catch (UpdateFailedException e) {
             log.error(e.getReason());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return false;
     }
 
     @Override
-    public boolean deleteSendMessage() {
+    public boolean deleteAllSendMessage() {
         try {
             return sendMessageRepository.deleteAll();
         } catch (DeleteFailedException e) {

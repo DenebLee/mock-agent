@@ -1,6 +1,7 @@
 package nanoit.kr.repository;
 
 
+import nanoit.kr.util.TestSetup;
 import nanoit.kr.domain.entity.SendEntity;
 import nanoit.kr.domain.message.MessageStatus;
 import org.junit.jupiter.api.AfterEach;
@@ -16,8 +17,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 
 @Testcontainers
-class SendMessageRepositoryImplTest extends RepositoryTestSetUp {
-    public SendMessageRepositoryImplTest() throws IOException {
+class SendMessageImplTest extends TestSetup {
+    public SendMessageImplTest() throws IOException {
         super("SEND");
     }
 
