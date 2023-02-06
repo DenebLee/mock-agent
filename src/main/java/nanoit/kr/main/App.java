@@ -56,7 +56,7 @@ public class App {
 
 
                 new ReceiveThread(getRandomUuid(), receivedMessageService, socket, queue);
-                new SendThread(getRandomUuid(), sendMessageService, socket, queue,properties);
+                new SendThread(getRandomUuid(), sendMessageService, socket, queue, properties);
 
                 ModuleProcessManagerImpl moduleProcessManager = ModuleProcess.moduleProcessManagerImpl;
 

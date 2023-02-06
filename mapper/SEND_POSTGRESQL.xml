@@ -27,6 +27,15 @@
     <delete id="send_deleteAll">
         DELETE
         FROM send;
+        ALTER TABLE send
+            ALTER COLUMN id
+                RESTART WITH 1;
+    </delete>
+
+    <delete id="send_deleteById" parameterType="_long">
+        DELETE
+        FROM send
+        WHERE id = #{id};
     </delete>
 
     <update id="send_updateMessageStatus" parameterType="nanoit.kr.domain.entity.SendEntity">
@@ -35,15 +44,22 @@
         WHERE id = #{id};
     </update>
 
-    <select id="send_selectById" parameterType="_long">
+    <select id="send_selectById" parameterType="_long" resultType="nanoit.kr.domain.entity.SendEntity">
         SELECT *
         FROM send
         WHERE id = #{id};
     </select>
 
-    <select id="send_selectAll">
-
+    <select id="send_selectAll" resultType="nanoit.kr.domain.entity.SendEntity">
+        SELECT *
+        FROM send;
     </select>
+
+    <insert id="send_insert" parameterType="nanoit.kr.domain.entity.SendEntity">
+        INSERT INTO send (phone_num, callback, name, content, created_at, last_modified_at)
+        VALUES (#{phoneNum}, #{callback}, #{name}, #{content}, #{createdAt}, #{lastModifiedAt});
+    </insert>
+
 
     <select id="send_ping" resultType="java.lang.Boolean">
         SELECT 1;

@@ -21,6 +21,6 @@ public class SendAckEntity {
     private Timestamp lastModifiedAt;
 
     public SendAck toDto() {
-        return new SendAck(result);
+        return new SendAck(result, createdAt, lastModifiedAt);
     }
 }

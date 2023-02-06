@@ -3,6 +3,7 @@ package nanoit.kr.repository;
 import nanoit.kr.db.DataBaseSessionManager;
 import nanoit.kr.domain.entity.SendEntity;
 import nanoit.kr.exception.DeleteFailedException;
+import nanoit.kr.exception.InsertFailedException;
 import nanoit.kr.exception.SelectFailedException;
 import nanoit.kr.exception.UpdateFailedException;
 import org.apache.ibatis.session.SqlSession;
@@ -16,10 +17,10 @@ public class SendMessageRepositoryImpl implements SendMessageRepository {
 
     public SendMessageRepositoryImpl(Properties properties) throws IOException {
         this.sessionManager = new DataBaseSessionManager(properties);
-        createSendTable();
+        createTable();
     }
 
-    private void createSendTable() {
+    private void createTable() {
         try (SqlSession session = sessionManager.getSqlSession(true)) {
             session.update("createSendTable");
         } catch (Exception e) {
@@ -56,36 +57,27 @@ public class SendMessageRepositoryImpl implements SendMessageRepository {
     }
 
     @Override
-    public int updateMessageStatus(SendEntity sendEntity) {
+    public boolean updateMessageStatus(SendEntity sendEntity) {
         try (SqlSession session = sessionManager.getSqlSession(true)) {
             int result = session.update("send_updateMessageStatus", sendEntity);
             if (result > 0) {
-                return result;
+                return true;
             }
         } catch (Exception e) {
             throw new UpdateFailedException("Failed to Update MessageStatus => " + e.getMessage());
         }
-        return 0;
+        return false;
     }
 
     @Override
     public SendEntity selectById(long id) {
         try (SqlSession session = sessionManager.getSqlSession(true)) {
-            SendEntity sendEntity = session.selectOne("send_selectById", id);
-            if (sendEntity != null) {
-                return sendEntity;
-            }
+            return session.selectOne("send_selectById", id);
         } catch (Exception e) {
             throw new SelectFailedException("Failed to Select Send Message used Id => " + e.getMessage());
         }
-        return null;
     }
 
-
-    // 최초 select 할때 마지막 id 기준으로 보다 큰 id 값 들 가져오도록
-    // status 가 null 인 것들
-
-    // 두개의 조건이면 뚫리지 않나?
     @Override
     public List<SendEntity> selectAll() {
         try (SqlSession session = sessionManager.getSqlSession(true)) {
@@ -104,7 +96,37 @@ public class SendMessageRepositoryImpl implements SendMessageRepository {
         try (SqlSession session = sessionManager.getSqlSession(true)) {
             return session.selectOne("send_ping");
         } catch (Exception e) {
-            throw new SelectFailedException("The Receive Table is not Created => " + e.getMessage());
+            throw new SelectFailedException("The Send Table is not Created => " + e.getMessage());
         }
+    }
+
+    @Override
+    public boolean insert(SendEntity send) {
+        try (SqlSession session = sessionManager.getSqlSession(true)) {
+            int result = session.insert("send_insert", send);
+            if (result > 0) {
+                return true;
+            } else if (result == 0) {
+                return false;
+            }
+        } catch (Exception e) {
+            throw new InsertFailedException("Failed to Insert Send Table =>" + e.getMessage());
+        }
+        return false;
+    }
+
+    @Override
+    public boolean deleteById(long id) {
+        try (SqlSession session = sessionManager.getSqlSession(true)) {
+            int result = session.delete("send_deleteById", id);
+            if (result > 0) {
+                return true;
+            } else if (result == 0) {
+                return false;
+            }
+        } catch (Exception e) {
+            throw new DeleteFailedException("Failed to Delete by Id => " + e.getMessage());
+        }
+        return false;
     }
 }

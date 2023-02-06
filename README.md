@@ -1,7 +1,6 @@
-# Standard Readme
+# Mock Agent
 
-[![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/RichardLitt/standard-readme)
-
+![GitHub last commit](https://img.shields.io/github/last-commit/DenebLee/MockAgent) ![GitHub repo size](https://img.shields.io/github/repo-size/DenebLee/MockAgent) ![GitHub repo file count](https://img.shields.io/github/directory-file-count/DenebLee/MockAgent)
 
 ## Table of Contents
 
@@ -21,7 +20,7 @@ A project to develop a test agent so that it can respond to agent tasks
 ### Project Goals
 - Create Test Codes
 - Policy
-  - TPS ( Transfer Per Seccond ), throttling, rate limit
+  - TPS ( Transfer Per Second ), throttling, rate limit
     - SMS 80 TPS
     - LMS 50 TPS
     - MMS 10 TPS
@@ -68,14 +67,14 @@ A project to develop a test agent so that it can respond to agent tasks
 - Send to developed G/W in 'Json' format
   - G/W support format is JSON format
   - `SEND` , `SEND_ACK`, `REPORT`, `REPORT_ACK`, `AUTHENTICATION`, `AUTHENTICATION_ACK`
-  - `Payload` → `type`, `messageUuid` , `Object`(`SEND` 등등 )
+  - `Payload` → `type`, `messageUuid` , `Object`(`SEND` etc )
   - 'Socket.close' if 'Authentication' authentication fails
 - Work later upon completion of transmission
   - Map initialization work with selected data collected
     - Perform initialization on successful transfer
     - Missing data check logic required in queue
     - If a transfer fails, continue with the transfer failed.
-      - Customd Exception 사용
+      - Use Custom Exception
 - Update status so that selected and transferred columns are not imported in duplicate
 - Using DB Cursors? → Acquire prior knowledge and identify usability
 - Leverage Log to provide error identification for users
@@ -119,7 +118,7 @@ A project to develop a test agent so that it can respond to agent tasks
       public class ErrorPayload {
           private String reason;
       }
-      // 추후 삭제 후 ack에서 Error 전달 할 수 있도록 수정 필요
+      // Need to be corrected so that the error can be delivered in the ack after deleting it later
       ```
 
 - Validation
@@ -130,7 +129,7 @@ A project to develop a test agent so that it can respond to agent tasks
     - If an error occurs in G/W, the error payload is sent separately, so there is currently no way for the agent to respond.
 - Data 'insert' in 'ReceiveTable'
   - Load data to be inserted into 'Queue' one by one after validation in 'ReceiveThread'
-  - Insert data into the 'Recieve' table generated when the agent runs
+  - Insert data into the 'Receive' table generated when the agent runs
   - Alert users through 'Log' upon successful insert
   - Requires complete test code for insert failure
     - Write test code corresponding to failure conditions under different conditions
@@ -138,4 +137,4 @@ A project to develop a test agent so that it can respond to agent tasks
   
 ## License
 
-[MIT](LICENSE) © JeongSeob LEE
+[NANO-IT](LICENSE) © JeongSeob LEE

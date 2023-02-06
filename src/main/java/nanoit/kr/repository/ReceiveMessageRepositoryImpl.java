@@ -41,6 +41,15 @@ public class ReceiveMessageRepositoryImpl implements ReceiveMessageRepository {
     }
 
     @Override
+    public SendAckEntity selectById(long id) {
+        try (SqlSession session = sessionManager.getSqlSession(true)) {
+            return session.selectOne("receive_selectById", id);
+        } catch (Exception e) {
+            throw new SelectFailedException("Failed to Select By Id => " + e.getMessage());
+        }
+    }
+
+    @Override
     public boolean deleteById(long messageId) {
         try (SqlSession session = sessionManager.getSqlSession(true)) {
             int result = session.delete("receive_deleteById", messageId);
@@ -94,7 +103,7 @@ public class ReceiveMessageRepositoryImpl implements ReceiveMessageRepository {
                 return false;
             }
         } catch (Exception e) {
-            throw new InsertFailedException("Failed to Insert Receive Message");
+            throw new InsertFailedException("Failed to Insert Receive Message => " + e.getMessage());
         }
         return false;
     }

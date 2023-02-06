@@ -15,8 +15,10 @@ import java.sql.Timestamp;
 
 public class SendAck {
     private MessageResult result;
+    private Timestamp createdAt;
+    private Timestamp lastModifiedAt;
 
     public SendAckEntity toEntity() {
-        return new SendAckEntity(0, result, new Timestamp(System.currentTimeMillis()), new Timestamp(System.currentTimeMillis()));
+        return new SendAckEntity(0, result, createdAt, lastModifiedAt);
     }
 }

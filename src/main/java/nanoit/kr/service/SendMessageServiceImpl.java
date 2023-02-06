@@ -38,7 +38,7 @@ public class SendMessageServiceImpl implements SendMessageService {
     @Override
     public boolean updateSendMessageStatus(SendEntity sendEntity) {
         try {
-            return sendMessageRepository.updateMessageStatus(sendEntity) > 0;
+            return sendMessageRepository.updateMessageStatus(sendEntity);
         } catch (UpdateFailedException e) {
             log.error(e.getReason());
         }

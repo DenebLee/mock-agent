@@ -42,6 +42,12 @@
         FROM receive;
     </select>
 
+    <select id="receive_selectById" parameterType="_long" resultType="nanoit.kr.domain.entity.SendAckEntity">
+        SELECT id, result, created_at, last_modified_at
+        FROM receive
+        WHERE id = #{id};
+    </select>
+
     <delete id="receive_deleteById" parameterType="_long">
         DELETE
         from receive
@@ -51,6 +57,10 @@
     <delete id="receive_deleteAll">
         DELETE
         FROM receive;
+        ALTER TABLE receive
+            ALTER COLUMN id
+                RESTART WITH 1;
+
     </delete>
 
     <select id="receive_selectAll" resultType="nanoit.kr.domain.entity.SendAckEntity">
@@ -60,7 +70,7 @@
 
     <insert id="receive_insert" parameterType="nanoit.kr.domain.entity.SendAckEntity">
         INSERT INTO receive (result, created_at, last_modified_at)
-        VALUES (#{result}, NOW(), NOW());
+        VALUES (#{result}, #{createdAt}, #{lastModifiedAt});
     </insert>
 
     <select id="receive_ping" resultType="java.lang.Boolean">
