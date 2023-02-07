@@ -1,5 +1,6 @@
 package nanoit.kr.service;
 
+import nanoit.kr.domain.entity.SendEntity;
 import nanoit.kr.domain.message.MessageStatus;
 import nanoit.kr.domain.message.Send;
 
@@ -7,7 +8,7 @@ import java.util.List;
 
 public interface SendMessageService {
 
-    List<Send> selectSendMessages();
+    List<SendEntity> selectSendMessages();
 
     boolean updateSendMessageStatus(long id, MessageStatus messageStatus);
 
@@ -16,4 +17,6 @@ public interface SendMessageService {
     long count();
 
     boolean isAlive();
+
+    List<SendEntity> selectSendMessagesById(long id);
 }

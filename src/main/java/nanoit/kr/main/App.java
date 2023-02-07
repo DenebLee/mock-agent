@@ -6,10 +6,7 @@ import nanoit.kr.db.DatabaseHandler;
 import nanoit.kr.scheduler.DataBaseScheduler;
 import nanoit.kr.service.ReceiveMessageService;
 import nanoit.kr.service.SendMessageService;
-import nanoit.kr.thread.ModuleProcess;
-import nanoit.kr.thread.ModuleProcessManagerImpl;
-import nanoit.kr.thread.ReceiveThread;
-import nanoit.kr.thread.SendThread;
+import nanoit.kr.thread.ThreadResource;
 import org.apache.ibatis.io.Resources;
 
 import java.io.InputStream;
@@ -18,7 +15,6 @@ import java.net.Socket;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Properties;
-import java.util.UUID;
 
 
 @Slf4j
@@ -38,49 +34,44 @@ public class App {
                 properties.load(propertiesStream);
 
                 DatabaseHandler databaseHandler = new DatabaseHandler(properties);
+                TemporaryQueue queue = new TemporaryQueue();
                 SendMessageService sendMessageService = databaseHandler.getSendMessageService();
                 ReceiveMessageService receivedMessageService = databaseHandler.getReceivedMessageService();
-                TemporaryQueue queue = new TemporaryQueue();
+
 
                 if (sendMessageService.isAlive() && receivedMessageService.isAlive()) {
                     socket.connect(new InetSocketAddress(properties.getProperty("tcp.url"), Integer.parseInt(properties.getProperty("tcp.port"))));
+
+                    System.out.println();
+                    System.out.println("=================================================================================================================================================================================================");
+                    System.out.println("                                                                    AGENT START -- " + SIMPLE_DATE_FORMAT.format(new Date()));
+                    System.out.println("                                                                    CONNECT SUCCESS  -- " + socket.getInetAddress());
+                    System.out.println("                                                                                                                                                                                          ");
+                    System.out.println("                                                                                                                                                                                          ");
+                    System.out.println("                                                                    USER ID      ===    " + properties.getProperty("user.name"));
+                    System.out.println("                                                                    USER AGENT   ===    " + properties.getProperty("user.agent"));
+                    System.out.println("=================================================================================================================================================================================================");
+                    System.out.println();
+
+                    DataBaseScheduler dataBaseScheduler = new DataBaseScheduler(sendMessageService, queue);
+
+                    // 에이전트가 필요한 두개의 스레드를 생성하고 자원 관리하는 resource 생성
+                    ThreadResource threadResource = new ThreadResource(receivedMessageService, sendMessageService, socket, queue, properties);
+
+
+                    // socket 연결 성공 시 thread start() 실행
+                    if (socket.isConnected()) {
+                        threadResource.start();
+                    }
                 } else {
                     log.error("[APP] Error creating table and setting environment!!");
                     throw new Exception();
                 }
-
-                DataBaseScheduler dataBaseScheduler = new DataBaseScheduler(sendMessageService, queue);
-
-                // 스케쥴러에서는 select 된 메시지들 send_queue 에 담고 공유
-                // Queue 는 임시적으로 만들어서 테스트 -> 확인 필요
-
-
-                new ReceiveThread(getRandomUuid(), receivedMessageService, socket, queue);
-                new SendThread(getRandomUuid(), sendMessageService, socket, queue, properties);
-
-                ModuleProcessManagerImpl moduleProcessManager = ModuleProcess.moduleProcessManagerImpl;
-
-
-                System.out.println();
-                System.out.println("==========================================================================================================================================================================================");
-                System.out.println("                                                                    AGENT START -- " + SIMPLE_DATE_FORMAT.format(new Date()));
-                System.out.println("                                                                    CONNECT SUCCESS  -- " + socket.getInetAddress());
-                System.out.println("                                                                                                                                                                                          ");
-                System.out.println("                                                                                                                                                                                          ");
-                System.out.println("                                                                    USER ID      ===    " + properties.getProperty("user.name"));
-                System.out.println("                                                                    USER AGENT   ===    " + properties.getProperty("user.agent"));
-                System.out.println("==========================================================================================================================================================================================");
-                System.out.println();
-
             } else {
                 throw new Exception();
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    private static String getRandomUuid() {
-        return UUID.randomUUID().toString();
     }
 }

@@ -2,55 +2,74 @@ package nanoit.kr.thread;
 
 import lombok.extern.slf4j.Slf4j;
 import nanoit.kr.TemporaryQueue;
+import nanoit.kr.domain.message.AuthenticationAck;
+import nanoit.kr.domain.message.MessageResult;
+import nanoit.kr.domain.message.Payload;
+import nanoit.kr.domain.message.PayloadType;
+import nanoit.kr.extension.Jackson;
 import nanoit.kr.service.ReceiveMessageService;
 
+import java.io.BufferedReader;
 import java.net.Socket;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 @Slf4j
-public class ReceiveThread extends ModuleProcess {
-
+public class ReceiveThread implements Runnable {
+    private final Consumer<String> cleaner;
     private final ReceiveMessageService receiveMessageService;
     private final Socket socket;
     private final TemporaryQueue queue;
+    private final BufferedReader bufferedReader;
+    private final AtomicBoolean authenticationStatus;
+    private final AtomicBoolean readThreadStatus;
 
-    public ReceiveThread(String uuid, ReceiveMessageService receiveMessageService, Socket socket, TemporaryQueue queue) {
-        super(uuid);
+    public ReceiveThread(Consumer<String> cleaner, ReceiveMessageService receiveMessageService, Socket socket, TemporaryQueue queue, BufferedReader bufferedReader, AtomicBoolean authenticationStatus, AtomicBoolean readThreadStatus) {
+        this.cleaner = cleaner;
         this.socket = socket;
         this.receiveMessageService = receiveMessageService;
         this.queue = queue;
+        this.bufferedReader = bufferedReader;
+        this.authenticationStatus = authenticationStatus;
+        this.readThreadStatus = readThreadStatus;
     }
 
     @Override
     public void run() {
         try {
-            log.info("[RECEIVE- {}] THREAD START", uuid);
+            log.info("[RECEIVE] RECEIVE - THREAD START");
+            // 인증 메시지를 보낸다음 authentication 성공 여부에 따라 루프문 실행
 
+            while (readThreadStatus.get()) {
+                String receiveData = bufferedReader.readLine();
+                if (receiveData != null) {
+                    log.info("[RECEIVE] RECEIVE DATA : {}", receiveData);
+                    Payload payload = Jackson.getInstance().getObjectMapper().readValue(receiveData, Payload.class);
+                    switch (payload.getType()) {
+                        case SEND_ACK:
+                            // some code
+                            System.out.println("ack 메시지 받음");
+                            break;
+                        case AUTHENTICATION_ACK:
+                            AuthenticationAck authenticationAck = Jackson.getInstance().getObjectMapper().convertValue(payload.getData(), AuthenticationAck.class);
+                            if (authenticationAck.getResult().contains("Success")) {
+                                authenticationStatus.compareAndSet(false, true);
+                            } else {
+                                socket.close();
+                                throw new Exception();
+                            }
+                            break;
+                        case REPORT:
+                            // some code
+                            break;
 
-            // 인증 메시지를 보낸다음 authentication 성공 여부에 따라 루프문 실행?
-            // 최초 실행시 start log , 인증 메시지 전송 , 최초 select 후 queue 에 담기
+                    }
 
-            while (true) {
-
+                }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.warn("[RECEIVE] terminating ", e);
+            cleaner.accept(this.getClass().getName());
         }
     }
-
-    @Override
-    public void shoutDown() {
-
-    }
-
-    @Override
-    public void sleep() throws InterruptedException {
-
-    }
-
-    @Override
-    public String getUuid() {
-        return null;
-    }
-
-
 }

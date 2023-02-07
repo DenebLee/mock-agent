@@ -11,7 +11,6 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 
 public class Send {
-    private long id;
     private String phoneNum;
     private String callback;
     private String name;

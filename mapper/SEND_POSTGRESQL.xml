@@ -55,11 +55,17 @@
         FROM send;
     </select>
 
+    <select id="test" parameterType="_long" resultType="nanoit.kr.domain.entity.SendEntity">
+        SELECT *
+        FROM send
+        WHERE id > #{id}
+          AND status IS NULL;
+    </select>
+
     <insert id="send_insert" parameterType="nanoit.kr.domain.entity.SendEntity">
         INSERT INTO send (phone_num, callback, name, content, created_at, last_modified_at)
         VALUES (#{phoneNum}, #{callback}, #{name}, #{content}, #{createdAt}, #{lastModifiedAt});
     </insert>
-
 
     <select id="send_ping" resultType="java.lang.Boolean">
         SELECT 1;

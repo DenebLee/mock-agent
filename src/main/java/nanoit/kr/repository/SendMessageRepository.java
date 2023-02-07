@@ -29,5 +29,8 @@ public interface SendMessageRepository {
 
     boolean deleteById(long id);
 
+    List<SendEntity> selectAllById(long id);
+
+
 }
 

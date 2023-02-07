@@ -129,4 +129,17 @@ public class SendMessageRepositoryImpl implements SendMessageRepository {
         }
         return false;
     }
+
+    @Override
+    public List<SendEntity> selectAllById(long id) {
+        try (SqlSession session = sessionManager.getSqlSession(true)) {
+            List<SendEntity> selectList = session.selectList("test", id);
+            if (selectList.isEmpty()) {
+                return null;
+            }
+            return selectList;
+        } catch (Exception e) {
+            throw new SelectFailedException("Failed to Select Send MessagesById => " + e.getMessage());
+        }
+    }
 }

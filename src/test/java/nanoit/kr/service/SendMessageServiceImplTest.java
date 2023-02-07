@@ -48,7 +48,7 @@ class SendMessageServiceImplTest extends TestSetup {
         }
 
         // when
-        List<Send> resultList = sendMessageService.selectSendMessages();
+        List<SendEntity> resultList = sendMessageService.selectSendMessages();
 
         // then
         assertThat(resultList.size()).isEqualTo(count);
@@ -133,7 +133,7 @@ class SendMessageServiceImplTest extends TestSetup {
 
         // then
         assertThat(countResult).isEqualTo(count);
-        List<Send> list = sendMessageService.selectSendMessages();
+        List<SendEntity> list = sendMessageService.selectSendMessages();
         assertThat(list.size()).isEqualTo(countResult);
 
     }

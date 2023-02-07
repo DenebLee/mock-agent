@@ -25,6 +25,6 @@ public class SendEntity {
     private Timestamp lastModifiedAt;
 
     public Send toDto() {
-        return new Send(id, phoneNum, callback, name, content);
+        return new Send(phoneNum, callback, name, content);
     }
 }

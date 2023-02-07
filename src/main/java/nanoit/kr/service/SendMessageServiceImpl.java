@@ -3,13 +3,11 @@ package nanoit.kr.service;
 import lombok.extern.slf4j.Slf4j;
 import nanoit.kr.domain.entity.SendEntity;
 import nanoit.kr.domain.message.MessageStatus;
-import nanoit.kr.domain.message.Send;
 import nanoit.kr.exception.DeleteFailedException;
 import nanoit.kr.exception.SelectFailedException;
 import nanoit.kr.exception.UpdateFailedException;
 import nanoit.kr.repository.SendMessageRepository;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -23,13 +21,9 @@ public class SendMessageServiceImpl implements SendMessageService {
     }
 
     @Override
-    public List<Send> selectSendMessages() {
+    public List<SendEntity> selectSendMessages() {
         try {
-            List<Send> data = new ArrayList<>();
-            for (SendEntity entry : sendMessageRepository.selectAll()) {
-                data.add(entry.toDto());
-            }
-            return data;
+            return sendMessageRepository.selectAll();
         } catch (SelectFailedException e) {
             log.error(e.getReason());
         }
@@ -73,5 +67,15 @@ public class SendMessageServiceImpl implements SendMessageService {
     @Override
     public boolean isAlive() {
         return sendMessageRepository.isAlive();
+    }
+
+    @Override
+    public List<SendEntity> selectSendMessagesById(long id) {
+        try {
+            return sendMessageRepository.selectAllById(id);
+        } catch (SelectFailedException e) {
+            log.error(e.getReason());
+        }
+        return null;
     }
 }
