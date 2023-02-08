@@ -19,4 +19,8 @@ public interface SendMessageService {
     boolean isAlive();
 
     List<SendEntity> selectSendMessagesById(long id);
+
+    boolean insert(SendEntity send);
+
+    boolean insertAll(List<SendEntity> list);
 }

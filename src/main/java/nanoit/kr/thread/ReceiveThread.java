@@ -2,15 +2,13 @@ package nanoit.kr.thread;
 
 import lombok.extern.slf4j.Slf4j;
 import nanoit.kr.TemporaryQueue;
-import nanoit.kr.domain.message.AuthenticationAck;
-import nanoit.kr.domain.message.MessageResult;
-import nanoit.kr.domain.message.Payload;
-import nanoit.kr.domain.message.PayloadType;
+import nanoit.kr.domain.message.*;
 import nanoit.kr.extension.Jackson;
 import nanoit.kr.service.ReceiveMessageService;
 
 import java.io.BufferedReader;
 import java.net.Socket;
+import java.sql.Timestamp;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
@@ -39,16 +37,21 @@ public class ReceiveThread implements Runnable {
         try {
             log.info("[RECEIVE] RECEIVE - THREAD START");
             // 인증 메시지를 보낸다음 authentication 성공 여부에 따라 루프문 실행
-
             while (readThreadStatus.get()) {
                 String receiveData = bufferedReader.readLine();
                 if (receiveData != null) {
-                    log.info("[RECEIVE] RECEIVE DATA : {}", receiveData);
+//                    log.info("[RECEIVE] RECEIVE DATA : [{}]", receiveData);
                     Payload payload = Jackson.getInstance().getObjectMapper().readValue(receiveData, Payload.class);
                     switch (payload.getType()) {
                         case SEND_ACK:
-                            // some code
-                            System.out.println("ack 메시지 받음");
+                            SendAck sendAck = Jackson.getInstance().getObjectMapper().convertValue(payload.getData(), SendAck.class);
+//                            log.info("[RECEIVE] SEND_ACK receive result : [{}]", sendAck.getResult());
+                            sendAck
+                                    .setCreatedAt(new Timestamp(System.currentTimeMillis()))
+                                    .setLastModifiedAt(new Timestamp(System.currentTimeMillis()));
+                            if (!receiveMessageService.insertReceiveMessage(sendAck)) {
+                                log.error("[RECEIVE] RECEIVE DATA INSERT TO DB FAILED ");
+                            }
                             break;
                         case AUTHENTICATION_ACK:
                             AuthenticationAck authenticationAck = Jackson.getInstance().getObjectMapper().convertValue(payload.getData(), AuthenticationAck.class);
@@ -60,11 +63,10 @@ public class ReceiveThread implements Runnable {
                             }
                             break;
                         case REPORT:
-                            // some code
+                            Report report = Jackson.getInstance().getObjectMapper().convertValue(payload.getData(), Report.class);
+//                            log.info("[RECEIVE] REPORT receive agentId : [{}] result : [{}]", report.getAgent_id(), report.getResult());
                             break;
-
                     }
-
                 }
             }
         } catch (Exception e) {

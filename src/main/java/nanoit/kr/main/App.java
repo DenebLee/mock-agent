@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import nanoit.kr.TemporaryQueue;
 import nanoit.kr.db.DatabaseHandler;
 import nanoit.kr.scheduler.DataBaseScheduler;
+import nanoit.kr.scheduler.DataBaseSchedulerForInsertData;
 import nanoit.kr.service.ReceiveMessageService;
 import nanoit.kr.service.SendMessageService;
 import nanoit.kr.thread.ThreadResource;
@@ -55,14 +56,14 @@ public class App {
 
                     DataBaseScheduler dataBaseScheduler = new DataBaseScheduler(sendMessageService, queue);
 
-                    // 에이전트가 필요한 두개의 스레드를 생성하고 자원 관리하는 resource 생성
                     ThreadResource threadResource = new ThreadResource(receivedMessageService, sendMessageService, socket, queue, properties);
 
 
-                    // socket 연결 성공 시 thread start() 실행
                     if (socket.isConnected()) {
                         threadResource.start();
                     }
+
+                    DataBaseSchedulerForInsertData insertDataScheduler = new DataBaseSchedulerForInsertData(sendMessageService);
                 } else {
                     log.error("[APP] Error creating table and setting environment!!");
                     throw new Exception();

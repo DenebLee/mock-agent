@@ -2,7 +2,6 @@ package nanoit.kr.service;
 
 import nanoit.kr.domain.entity.SendEntity;
 import nanoit.kr.domain.message.MessageStatus;
-import nanoit.kr.domain.message.Send;
 import nanoit.kr.util.TestSetup;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;

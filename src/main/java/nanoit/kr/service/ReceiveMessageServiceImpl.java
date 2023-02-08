@@ -7,6 +7,8 @@ import nanoit.kr.exception.DeleteFailedException;
 import nanoit.kr.exception.InsertFailedException;
 import nanoit.kr.repository.ReceiveMessageRepository;
 
+import java.sql.Timestamp;
+
 
 @Slf4j
 public class ReceiveMessageServiceImpl implements ReceiveMessageService {

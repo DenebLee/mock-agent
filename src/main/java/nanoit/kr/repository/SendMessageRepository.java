@@ -31,6 +31,6 @@ public interface SendMessageRepository {
 
     List<SendEntity> selectAllById(long id);
 
-
+    boolean insertAll(List<SendEntity> list);
 }
 

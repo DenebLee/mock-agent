@@ -47,4 +47,8 @@ public class TemporaryQueue {
         return brokerQueue.get(type).poll(1, TimeUnit.SECONDS);
     }
 
+    public int getQueueSize(TemporaryDataType type) {
+        return brokerQueue.get(type).size();
+    }
+
 }

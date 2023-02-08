@@ -142,4 +142,14 @@ public class SendMessageRepositoryImpl implements SendMessageRepository {
             throw new SelectFailedException("Failed to Select Send MessagesById => " + e.getMessage());
         }
     }
+
+    @Override
+    public boolean insertAll(List<SendEntity> list) {
+        try (SqlSession session = sessionManager.getSqlSession(true)) {
+            int a = session.insert("send_insertAll", list);
+            return a == list.size();
+        } catch (Exception e) {
+            throw new SelectFailedException("Failed to Select Send MessagesById => " + e.getMessage());
+        }
+    }
 }

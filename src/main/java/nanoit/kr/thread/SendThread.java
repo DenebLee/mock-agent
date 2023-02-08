@@ -30,7 +30,7 @@ public class SendThread implements Runnable {
     private AtomicBoolean authenticationStatus;
     private AtomicBoolean sendThreadStatus;
 
-    public SendThread(Consumer<String> cleaner, SendMessageService sendMessageService, Socket socket, TemporaryQueue queue, Properties properties, BufferedWriter bufferedWriter, AtomicBoolean authenticationStatus, AtomicBoolean sendThreadStatus) throws IOException {
+    public SendThread(Consumer<String> cleaner, SendMessageService sendMessageService, Socket socket, TemporaryQueue queue, Properties properties, BufferedWriter bufferedWriter, AtomicBoolean authenticationStatus, AtomicBoolean sendThreadStatus) {
         this.cleaner = cleaner;
         this.socket = socket;
         this.sendMessageService = sendMessageService;
@@ -41,8 +41,6 @@ public class SendThread implements Runnable {
         this.sendThreadStatus = sendThreadStatus;
     }
 
-
-    // 인증 무조건 성공하는 조건으로 일단 제작
     @Override
     public void run() {
         try {
@@ -74,7 +72,7 @@ public class SendThread implements Runnable {
         str = str + "\n";
         bufferedWriter.write(str);
         bufferedWriter.flush();
-        log.info("[SEND] DATA SEND TO G/W SUCCESS => DATA : {}", str);
+//        log.info("[SEND] DATA SEND TO G/W SUCCESS => DATA : {}", str);
         return true;
     }
 }

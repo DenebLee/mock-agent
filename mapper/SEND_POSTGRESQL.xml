@@ -71,6 +71,14 @@
         SELECT 1;
     </select>
 
+    <insert id="send_insertAll" parameterType="java.util.List">
+        INSERT INTO send (phone_num, callback, name, content, created_at, last_modified_at)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.phoneNum},#{item.callback},#{item.name},#{item.content},#{item.createdAt},#{item.lastModifiedAt})
+        </foreach>
+    </insert>
+
 
 </mapper>
 
