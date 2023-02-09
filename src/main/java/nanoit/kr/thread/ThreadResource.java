@@ -55,10 +55,10 @@ public class ThreadResource {
         this.authenticationStatus = new AtomicBoolean(false);
 
 
-        this.writeThread = new Thread(new SendThread(this::writeThreadCleaner, this.sendMessageService, this.socket, this.queue, this.properties, this.bufferedWriter, this.authenticationStatus,this.writeThreadStatus));
+        this.writeThread = new Thread(new SendThread(this::writeThreadCleaner, this.queue, this.bufferedWriter, this.authenticationStatus, this.writeThreadStatus));
         writeThread.setName("WRITE-THREAD");
 
-        this.receiveThread = new Thread(new ReceiveThread(this::receiveThreadCleaner, this.receiveMessageService, this.socket, this.queue, this.bufferedReader, this.authenticationStatus,this.readThreadStatus));
+        this.receiveThread = new Thread(new ReceiveThread(this::receiveThreadCleaner, this.queue, this.bufferedReader, this.readThreadStatus));
         receiveThread.setName("RECEIVE-THREAD");
     }
 
@@ -104,14 +104,17 @@ public class ThreadResource {
         this.socket.close();
     }
 
+    public void setAuthenticationStatus() {
+        this.authenticationStatus.compareAndSet(false, true);
+    }
+
     private boolean sendAuthentication(Properties properties) throws IOException {
         String payload = Jackson.getInstance().getObjectMapper().writeValueAsString(
                 new Payload(
-                        PayloadType.AUTHENTICATION, "123",
-                        new Authentication(Long.parseLong(properties.getProperty("user.agent")),
-                                properties.getProperty("user.name"),
-                                properties.getProperty("user.password"),
-                                properties.getProperty("user.email"))));
+                        PayloadType.AUTHENTICATION, "33", new Authentication(Long.parseLong(properties.getProperty("user.agent")),
+                        properties.getProperty("user.name"),
+                        properties.getProperty("user.password"),
+                        properties.getProperty("user.email"))));
         payload = payload + "\n";
         bufferedWriter.write(payload);
         bufferedWriter.flush();

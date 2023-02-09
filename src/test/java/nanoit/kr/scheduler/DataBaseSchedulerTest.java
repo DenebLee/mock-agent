@@ -1,19 +1,22 @@
 package nanoit.kr.scheduler;
 
-import nanoit.kr.TemporaryDataType;
+import nanoit.kr.InternalDataType;
 import nanoit.kr.TemporaryQueue;
 import nanoit.kr.domain.entity.SendEntity;
 import nanoit.kr.domain.message.Send;
 import nanoit.kr.extension.Jackson;
 import nanoit.kr.util.TestSetup;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.IOException;
 import java.sql.Timestamp;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.spy;
 
 
 @Testcontainers
@@ -59,7 +62,7 @@ class DataBaseSchedulerTest extends TestSetup {
         Thread.sleep(3000);
 
         // then
-        assertThat(queue.getQueueSize(TemporaryDataType.SEND)).isEqualTo(count);
+        assertThat(queue.getQueueSize(InternalDataType.SENDER)).isEqualTo(count);
     }
 
     @DisplayName("스케쥴러가 select 한 데이터와 queue 에 담은 데이터가 일치 하여야 한다")
@@ -81,7 +84,7 @@ class DataBaseSchedulerTest extends TestSetup {
         Thread.sleep(2000);
 
         // then
-        Object object = queue.subscribe(TemporaryDataType.SEND);
+        Object object = queue.subscribe(InternalDataType.SENDER);
         assertThat(object).isInstanceOf(Send.class);
         Send send = Jackson.getInstance().getObjectMapper().convertValue(object, Send.class);
         assertThat(send.getContent()).isEqualTo(expected.getContent());

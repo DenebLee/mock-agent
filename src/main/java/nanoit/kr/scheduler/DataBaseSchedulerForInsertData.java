@@ -31,12 +31,7 @@ public class DataBaseSchedulerForInsertData {
         @Override
         public void run() {
             try {
-                Scanner scanner = new Scanner(System.in);
-                System.out.println();
-                System.out.println("=================================================================================================================================================================================================");
-                System.out.println("                                                                            전송 할 메시지 입력 ");
-                System.out.println("=================================================================================================================================================================================================");
-                int limit = scanner.nextInt();
+                int limit = 1;
                 int count = 0;
                 SendEntity sendEntity = new SendEntity();
                 List<SendEntity> list = new ArrayList<>();

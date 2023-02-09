@@ -12,5 +12,5 @@ import lombok.Setter;
 public class AuthenticationAck {
 
     private long agent_id;
-    private String result;
+    private MessageResult result;
 }

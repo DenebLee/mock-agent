@@ -1,9 +1,9 @@
 package nanoit.kr;
 
-import nanoit.kr.domain.message.Report;
-import nanoit.kr.domain.message.ReportAck;
-import nanoit.kr.domain.message.Send;
-import nanoit.kr.domain.message.SendAck;
+import nanoit.kr.domain.internaldata.InternalDataFilter;
+import nanoit.kr.domain.internaldata.InternalDataInsert;
+import nanoit.kr.domain.internaldata.InternalDataMapper;
+import nanoit.kr.domain.internaldata.InternalDataSender;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,30 +12,30 @@ import java.util.concurrent.TimeUnit;
 
 public class TemporaryQueue {
 
-    private final Map<TemporaryDataType, LinkedBlockingQueue<Object>> brokerQueue;
+    private final Map<InternalDataType, LinkedBlockingQueue<Object>> brokerQueue;
 
 
     public TemporaryQueue() {
         this.brokerQueue = new HashMap<>();
 
-        for (TemporaryDataType type : TemporaryDataType.values()) {
+        for (InternalDataType type : InternalDataType.values()) {
             brokerQueue.put(type, new LinkedBlockingQueue<>());
         }
     }
 
     public boolean publish(Object object) {
         if (object != null) {
-            if (object instanceof Send) {
-                return brokerQueue.get(TemporaryDataType.SEND).offer(object);
+            if (object instanceof InternalDataSender) {
+                return brokerQueue.get(InternalDataType.SENDER).offer(object);
             }
-            if (object instanceof SendAck) {
-                return brokerQueue.get(TemporaryDataType.SEND_ACK).offer(object);
+            if (object instanceof InternalDataFilter) {
+                return brokerQueue.get(InternalDataType.Filter).offer(object);
             }
-            if (object instanceof Report) {
-                return brokerQueue.get(TemporaryDataType.REPORT).offer(object);
+            if (object instanceof InternalDataInsert) {
+                return brokerQueue.get(InternalDataType.INSERT).offer(object);
             }
-            if (object instanceof ReportAck) {
-                return brokerQueue.get(TemporaryDataType.REPORT_ACK).offer(object);
+            if (object instanceof InternalDataMapper) {
+                return brokerQueue.get(InternalDataType.MAPPER).offer(object);
             }
         } else {
             return false;
@@ -43,11 +43,11 @@ public class TemporaryQueue {
         return false;
     }
 
-    public Object subscribe(TemporaryDataType type) throws InterruptedException {
+    public Object subscribe(InternalDataType type) throws InterruptedException {
         return brokerQueue.get(type).poll(1, TimeUnit.SECONDS);
     }
 
-    public int getQueueSize(TemporaryDataType type) {
+    public int getQueueSize(InternalDataType type) {
         return brokerQueue.get(type).size();
     }
 

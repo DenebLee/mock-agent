@@ -3,7 +3,10 @@ package nanoit.kr.scheduler;
 import lombok.extern.slf4j.Slf4j;
 import nanoit.kr.TemporaryQueue;
 import nanoit.kr.domain.entity.SendEntity;
-import nanoit.kr.domain.message.Send;
+import nanoit.kr.domain.internaldata.InternalDataMapper;
+import nanoit.kr.domain.message.MessageStatus;
+import nanoit.kr.domain.message.Payload;
+import nanoit.kr.domain.message.PayloadType;
 import nanoit.kr.service.SendMessageService;
 
 import java.util.List;
@@ -31,27 +34,32 @@ public class DataBaseScheduler {
         public void run() {
             try {
                 long count = sendMessageService.count();
+
                 if (count == 0) {
                     log.info("[SCHEDULER] There are no Data for SEND");
+
                 } else if (count > 0) {
                     List<SendEntity> selectData = sendMessageService.selectSendMessagesById(conditionId);
+
                     if (!selectData.isEmpty()) {
-//                        log.info("[SCHEDULER] SELECT DATA FROM SEND TABLE select data count : {}", selectData.size());
+                        log.debug("[SCHEDULER] SELECT DATA FROM SEND TABLE select data count : {}", selectData.size());
                         conditionId = selectData.get(selectData.size() - 1).getId();
-//                        log.info("[SCHEDULER] conditionId VALUE CHECK : {}", conditionId);
+                        log.debug("[SCHEDULER] conditionId VALUE CHECK : {}", conditionId);
+
                         for (SendEntity sendEntity : selectData) {
-                            Send send = sendEntity.toDto();
-                            if (queue.publish(send)) {
-//                                log.info("[SCHEDULER] DATA INSERT IN TO QUEUE SUCCESS data : {}", send);
+                            if (queue.publish(new InternalDataMapper(new Payload(PayloadType.SEND, String.valueOf(count), sendEntity.toDto())))) {
+                                log.debug("[SCHEDULER] DATA INSERT IN TO QUEUE SUCCESS data : {}", sendEntity.toDto());
+                                sendMessageService.updateSendMessageStatus(sendEntity.getId(), MessageStatus.SENT);
                             }
                         }
                         selectData.clear();
+
                     } else {
                         log.warn("[SCHEDULER] DATA TO IMPORT DOES NOT EXIST IN THE TABLE");
                     }
                 }
             } catch (NullPointerException e) {
-                log.info("[SCHEDULER] There is no data in the table to select -> {}", e.getMessage());
+                log.debug("[SCHEDULER] There is no data in the table to select -> {}", e.getMessage());
             } catch (Exception e) {
                 e.printStackTrace();
                 scheduledExecutorService.shutdown();

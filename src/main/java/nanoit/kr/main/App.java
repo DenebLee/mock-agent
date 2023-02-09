@@ -3,6 +3,9 @@ package nanoit.kr.main;
 import lombok.extern.slf4j.Slf4j;
 import nanoit.kr.TemporaryQueue;
 import nanoit.kr.db.DatabaseHandler;
+import nanoit.kr.module.Filter;
+import nanoit.kr.module.Insert;
+import nanoit.kr.module.Mapper;
 import nanoit.kr.scheduler.DataBaseScheduler;
 import nanoit.kr.scheduler.DataBaseSchedulerForInsertData;
 import nanoit.kr.service.ReceiveMessageService;
@@ -16,6 +19,7 @@ import java.net.Socket;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Properties;
+import java.util.UUID;
 
 
 @Slf4j
@@ -41,18 +45,10 @@ public class App {
 
 
                 if (sendMessageService.isAlive() && receivedMessageService.isAlive()) {
+
+
                     socket.connect(new InetSocketAddress(properties.getProperty("tcp.url"), Integer.parseInt(properties.getProperty("tcp.port"))));
 
-                    System.out.println();
-                    System.out.println("=================================================================================================================================================================================================");
-                    System.out.println("                                                                    AGENT START -- " + SIMPLE_DATE_FORMAT.format(new Date()));
-                    System.out.println("                                                                    CONNECT SUCCESS  -- " + socket.getInetAddress());
-                    System.out.println("                                                                                                                                                                                          ");
-                    System.out.println("                                                                                                                                                                                          ");
-                    System.out.println("                                                                    USER ID      ===    " + properties.getProperty("user.name"));
-                    System.out.println("                                                                    USER AGENT   ===    " + properties.getProperty("user.agent"));
-                    System.out.println("=================================================================================================================================================================================================");
-                    System.out.println();
 
                     DataBaseScheduler dataBaseScheduler = new DataBaseScheduler(sendMessageService, queue);
 
@@ -61,9 +57,23 @@ public class App {
 
                     if (socket.isConnected()) {
                         threadResource.start();
+                        new Mapper(getRandomUuid(), queue);
+                        new Filter(getRandomUuid(), queue, threadResource);
+                        new Insert(getRandomUuid(), queue, receivedMessageService);
                     }
-
                     DataBaseSchedulerForInsertData insertDataScheduler = new DataBaseSchedulerForInsertData(sendMessageService);
+
+                    System.out.println();
+                    System.out.println("=================================================================================================================================================================================================");
+                    System.out.println("                                                                    AGENT START -- " + SIMPLE_DATE_FORMAT.format(new Date()));
+                    System.out.println("                                                                    CONNECT SUCCESS  -- " + socket.getInetAddress());
+                    System.out.println("                                                                                                                                                                                          ");
+                    System.out.println("                                                                                                                                                                                          ");
+                    System.out.println("                                                                    USER ID         ===    " + properties.getProperty("user.name"));
+                    System.out.println("                                                                    USER AGENT      ===    " + properties.getProperty("user.agent"));
+                    System.out.println("                                                                    USER DATABASE   ===    " + properties.getProperty("user.database"));
+                    System.out.println("=================================================================================================================================================================================================");
+                    System.out.println();
                 } else {
                     log.error("[APP] Error creating table and setting environment!!");
                     throw new Exception();
@@ -74,5 +84,9 @@ public class App {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private static String getRandomUuid() {
+        return UUID.randomUUID().toString();
     }
 }
