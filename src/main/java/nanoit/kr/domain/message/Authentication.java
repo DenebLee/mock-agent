@@ -10,7 +10,7 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 
 public class Authentication {
-    private long agent_id;
+    private long agentId;
     private String username;
     private String password;
     private String email;

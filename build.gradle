@@ -42,20 +42,16 @@ dependencies {
     // DBCP2
     implementation group: 'org.apache.commons', name: 'commons-dbcp2', version: '2.9.0'
 
-    // JDBC DRIVER
+    // DB JDBC DRIVER
     implementation 'org.postgresql:postgresql:42.5.1'
+    implementation 'org.mariadb.jdbc:mariadb-java-client:3.1.2'
+    implementation group: 'mysql', name: 'mysql-connector-java', version: '8.0.28'
 
-    // DB
+    // MYBATIS
     implementation group: 'org.mybatis', name: 'mybatis', version: '3.5.11'
-
-    // BCRYPT
-    implementation group: 'at.favre.lib', name: 'bcrypt', version: '0.9.0'
-    implementation group: 'org.mindrot', name: 'jbcrypt', version: '0.4'
 
     // SCHEDULE
     implementation group: 'org.quartz-scheduler', name: 'quartz', version: '2.3.2'
-
-    implementation group: 'org.mybatis', name: 'mybatis', version: '3.5.11'
 }
 
 test {

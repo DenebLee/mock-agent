@@ -48,8 +48,13 @@ public class DataBaseScheduler {
 
                         for (SendEntity sendEntity : selectData) {
                             if (queue.publish(new InternalDataMapper(new Payload(PayloadType.SEND, String.valueOf(count), sendEntity.toDto())))) {
+
+                                // 에러발생
+                                // 중복값 안되게
+
                                 log.debug("[SCHEDULER] DATA INSERT IN TO QUEUE SUCCESS data : {}", sendEntity.toDto());
                                 sendMessageService.updateSendMessageStatus(sendEntity.getId(), MessageStatus.SENT);
+                                // 상태 수정
                             }
                         }
                         selectData.clear();

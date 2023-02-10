@@ -1,4 +1,4 @@
-package nanoit.kr;
+package nanoit.kr.domain.internaldata;
 
 public enum InternalDataType {
     MAPPER,

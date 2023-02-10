@@ -3,12 +3,8 @@ package nanoit.kr.thread;
 import lombok.extern.slf4j.Slf4j;
 import nanoit.kr.TemporaryQueue;
 import nanoit.kr.domain.internaldata.InternalDataMapper;
-import nanoit.kr.domain.message.Payload;
-import nanoit.kr.extension.Jackson;
-import nanoit.kr.service.ReceiveMessageService;
 
 import java.io.BufferedReader;
-import java.net.Socket;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 

@@ -1,7 +1,7 @@
 package nanoit.kr.module;
 
 import lombok.extern.slf4j.Slf4j;
-import nanoit.kr.InternalDataType;
+import nanoit.kr.domain.internaldata.InternalDataType;
 import nanoit.kr.TemporaryQueue;
 import nanoit.kr.domain.internaldata.InternalDataInsert;
 import nanoit.kr.domain.message.Report;

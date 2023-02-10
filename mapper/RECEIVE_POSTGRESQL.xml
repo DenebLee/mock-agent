@@ -48,6 +48,9 @@
         WHERE id = #{id};
     </select>
 
+    <select id="test">
+    </select>
+
     <delete id="receive_deleteById" parameterType="_long">
         DELETE
         from receive

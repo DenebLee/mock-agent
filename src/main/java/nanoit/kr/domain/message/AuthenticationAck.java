@@ -9,8 +9,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-public class AuthenticationAck {
-
-    private long agent_id;
-    private MessageResult result;
-}
+    public class AuthenticationAck {
+        private long agentId;
+        private MessageResult result;
+    }

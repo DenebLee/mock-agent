@@ -2,7 +2,7 @@ package nanoit.kr.module;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
-import nanoit.kr.InternalDataType;
+import nanoit.kr.domain.internaldata.InternalDataType;
 import nanoit.kr.TemporaryQueue;
 import nanoit.kr.domain.internaldata.InternalDataFilter;
 import nanoit.kr.domain.internaldata.InternalDataMapper;

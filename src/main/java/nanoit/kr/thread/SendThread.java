@@ -1,20 +1,12 @@
 package nanoit.kr.thread;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
-import nanoit.kr.InternalDataType;
+import nanoit.kr.domain.internaldata.InternalDataType;
 import nanoit.kr.TemporaryQueue;
 import nanoit.kr.domain.internaldata.InternalDataSender;
-import nanoit.kr.domain.message.Payload;
-import nanoit.kr.domain.message.PayloadType;
-import nanoit.kr.domain.message.Send;
-import nanoit.kr.extension.Jackson;
-import nanoit.kr.service.SendMessageService;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.net.Socket;
-import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
@@ -47,6 +39,8 @@ public class SendThread implements Runnable {
                             log.info("[SEND] DATA SEND TO G/W FAILED");
                         }
                     }
+
+                    // 뒤처리 로직
                 }
             }
         } catch (Exception e) {

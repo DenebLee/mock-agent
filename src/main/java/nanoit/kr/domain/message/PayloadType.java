@@ -8,6 +8,5 @@ public enum PayloadType {
     REPORT,
     REPORT_ACK,
     ALIVE,
-    ALIVE_ACK,
-    BAD_SEND
+    ALIVE_ACK
 }

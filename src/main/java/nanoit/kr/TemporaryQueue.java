@@ -1,9 +1,6 @@
 package nanoit.kr;
 
-import nanoit.kr.domain.internaldata.InternalDataFilter;
-import nanoit.kr.domain.internaldata.InternalDataInsert;
-import nanoit.kr.domain.internaldata.InternalDataMapper;
-import nanoit.kr.domain.internaldata.InternalDataSender;
+import nanoit.kr.domain.internaldata.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,6 +21,7 @@ public class TemporaryQueue {
     }
 
     public boolean publish(Object object) {
+        // 단순화 작업
         if (object != null) {
             if (object instanceof InternalDataSender) {
                 return brokerQueue.get(InternalDataType.SENDER).offer(object);

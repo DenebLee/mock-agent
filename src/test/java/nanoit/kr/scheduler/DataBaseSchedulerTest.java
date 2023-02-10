@@ -1,6 +1,6 @@
 package nanoit.kr.scheduler;
 
-import nanoit.kr.InternalDataType;
+import nanoit.kr.domain.internaldata.InternalDataType;
 import nanoit.kr.TemporaryQueue;
 import nanoit.kr.domain.entity.SendEntity;
 import nanoit.kr.domain.message.Send;
