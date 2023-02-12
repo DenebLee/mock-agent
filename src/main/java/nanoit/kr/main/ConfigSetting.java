@@ -26,7 +26,7 @@ public class ConfigSetting {
         this.list = new ArrayList<>();
     }
 
-    public List<PropertyDto> setting() throws IOException {
+public List<PropertyDto> setting() throws IOException {
         try {
             configureFiles = new File(System.getProperty("user.dir") + "/config").listFiles();
             System.out.println(Arrays.toString(configureFiles));
