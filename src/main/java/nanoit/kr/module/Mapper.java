@@ -38,8 +38,7 @@ public class Mapper extends ModuleProcess {
                         } else {
                             log.warn("[MAPPER] DATA SEND TO WRITE-THREAD FAILED");
                         }
-
-
+                        
                         // Payload 으로 들어오는 값 Send , Report_ack , Alive,
                     } else if (mapperData.getData() instanceof Payload) {
                         Payload payload = (Payload) mapperData.getData();

@@ -1,18 +1,13 @@
 package nanoit.kr.repository;
 
-import com.google.protobuf.Message;
-import nanoit.kr.db.DataBaseSessionManager;
 import nanoit.kr.db.DataBaseSessionManagerTest;
 import nanoit.kr.domain.PropertyDto;
-import nanoit.kr.domain.entity.SendAckEntity;
-import nanoit.kr.exception.DeleteFailedException;
-import nanoit.kr.exception.InsertFailedException;
+import nanoit.kr.domain.entity.MessageEntity;
 import nanoit.kr.exception.SelectFailedException;
 import org.apache.ibatis.session.SqlSession;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Properties;
 
 public class MessageRepositoryImpl implements MessageRepository {
 
@@ -34,37 +29,86 @@ public class MessageRepositoryImpl implements MessageRepository {
     }
 
     @Override
-    public long count() {
-        return 0;
+    public long commonCount() {
+        try (SqlSession session = sessionManager.getSqlSession(true)) {
+            return session.selectOne("count");
+        } catch (Exception e) {
+            throw new SelectFailedException("Failed to Total count lookup failed => " + e.getMessage());
+        }
     }
 
     @Override
-    public SendAckEntity selectById(long id) {
-        return null;
-    }
-
-    @Override
-    public boolean deleteById(long id) {
+    public boolean commonDeleteTable() {
         return false;
     }
 
     @Override
-    public boolean deleteAll() {
+    public boolean commonPing() {
         return false;
     }
 
     @Override
-    public List<SendAckEntity> selectAll() {
-        return null;
-    }
-
-    @Override
-    public boolean insert(SendAckEntity sendAck) {
+    public boolean commonDeleteById(long id) {
         return false;
     }
 
     @Override
-    public boolean isAlive() {
+    public boolean isExistById(long id) {
+        try (SqlSession session = sessionManager.getSqlSession(true)) {
+
+
+        } catch (Exception e) {
+            throw new SelectFailedException("Failed to Delete Receive Message => " + e.getMessage());
+        }
         return false;
     }
+
+    @Override
+    public boolean insert(MessageEntity message) {
+        return false;
+    }
+
+    @Override
+    public boolean insertAll(List<MessageEntity> list) {
+        return false;
+    }
+
+
+    // Receive
+    @Override
+    public long receiveCount() {
+        try (SqlSession session = sessionManager.getSqlSession(true)) {
+            return session.selectOne("receive_count");
+        } catch (Exception e) {
+            throw new SelectFailedException("Failed to Total count lookup failed => " + e.getMessage());
+        }
+    }
+
+    @Override
+    public MessageEntity receiveSelectById(long id) {
+        try (SqlSession session = sessionManager.getSqlSession(true)) {
+            return session.selectOne("receive_selectById", id);
+        } catch (Exception e) {
+            throw new SelectFailedException("Failed to Select By Id => " + e.getMessage());
+        }
+    }
+
+    @Override
+    public List<MessageEntity> receiveSelectAll() {
+        try (SqlSession session = sessionManager.getSqlSession(true)) {
+            return session.selectList("receive_selectAll");
+        } catch (Exception e) {
+            throw new SelectFailedException("Failed to Select By Id => " + e.getMessage());
+        }
+    }
+
+    @Override
+    public boolean receiveUpdate(long id) {
+        return false;
+    }
+
+
+    // Send
+
+
 }

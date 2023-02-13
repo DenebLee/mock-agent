@@ -1,11 +1,11 @@
 package nanoit.kr.repository;
 
 import nanoit.kr.domain.PropertyDto;
+import nanoit.kr.domain.entity.MessageEntity;
 import nanoit.kr.domain.entity.SendAckEntity;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Properties;
 
 /*
     count -  사용 가능한 엔티티 수를 반환 ✔
@@ -27,19 +27,31 @@ public interface MessageRepository {
         };
     }
 
-    long count();
 
-    SendAckEntity selectById(long id);
+    // Common Method
+    long commonCount();
 
-    boolean deleteById(long id);
+    boolean commonDeleteTable();
 
-    boolean deleteAll();
+    boolean commonPing();
 
-    List<SendAckEntity> selectAll();
+    boolean commonDeleteById(long id);
 
-    boolean insert(SendAckEntity sendAck);
+    boolean isExistById(long id);
 
-    boolean isAlive();
+    boolean insert(MessageEntity message);
+
+    boolean insertAll(List<MessageEntity> list);
+
+    // Receive Method
+    long receiveCount();
+
+    MessageEntity receiveSelectById(long id);
+
+    List<MessageEntity> receiveSelectAll();
+
+    boolean receiveUpdate(long id);
+
 
 }
 
