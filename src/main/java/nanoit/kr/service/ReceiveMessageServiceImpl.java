@@ -1,13 +1,11 @@
 package nanoit.kr.service;
 
 import lombok.extern.slf4j.Slf4j;
-import nanoit.kr.domain.entity.SendAckEntity;
-import nanoit.kr.domain.message.SendAck;
+import nanoit.kr.domain.before.SendAckEntityBefore;
+import nanoit.kr.domain.before.SendAckBefore;
 import nanoit.kr.exception.DeleteFailedException;
 import nanoit.kr.exception.InsertFailedException;
 import nanoit.kr.repository.ReceiveMessageRepository;
-
-import java.sql.Timestamp;
 
 
 @Slf4j
@@ -22,10 +20,10 @@ public class ReceiveMessageServiceImpl implements ReceiveMessageService {
     }
 
     @Override
-    public boolean insertReceiveMessage(SendAck sendAck) {
+    public boolean insertReceiveMessage(SendAckBefore sendAckBefore) {
         try {
-            SendAckEntity sendAckEntity = sendAck.toEntity();
-            return receiveMessageRepository.insert(sendAckEntity);
+            SendAckEntityBefore sendAckEntityBefore = sendAckBefore.toEntity();
+            return receiveMessageRepository.insert(sendAckEntityBefore);
         } catch (InsertFailedException e) {
             log.error(e.getReason());
         }

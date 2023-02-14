@@ -1,7 +1,6 @@
 package nanoit.kr.repository;
 
-import nanoit.kr.domain.entity.SendAckEntity;
-import nanoit.kr.domain.message.SendAck;
+import nanoit.kr.domain.before.SendAckEntityBefore;
 
 import java.io.IOException;
 import java.util.List;
@@ -29,15 +28,15 @@ public interface ReceiveMessageRepository {
 
     long count();
 
-    SendAckEntity selectById(long id);
+    SendAckEntityBefore selectById(long id);
 
     boolean deleteById(long id);
 
     boolean deleteAll();
 
-    List<SendAckEntity> selectAll();
+    List<SendAckEntityBefore> selectAll();
 
-    boolean insert(SendAckEntity sendAck);
+    boolean insert(SendAckEntityBefore sendAck);
 
     boolean isAlive();
 

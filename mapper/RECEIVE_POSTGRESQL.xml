@@ -42,7 +42,7 @@
         FROM receive;
     </select>
 
-    <select id="receive_selectById" parameterType="_long" resultType="nanoit.kr.domain.entity.SendAckEntity">
+    <select id="receive_selectById" parameterType="_long" resultType="nanoit.kr.domain.before.SendAckEntityBefore">
         SELECT id, result, created_at, last_modified_at
         FROM receive
         WHERE id = #{id};
@@ -66,12 +66,12 @@
 
     </delete>
 
-    <select id="receive_selectAll" resultType="nanoit.kr.domain.entity.SendAckEntity">
+    <select id="receive_selectAll" resultType="nanoit.kr.domain.before.SendAckEntityBefore">
         SELECT *
         FROM receive;
     </select>
 
-    <insert id="receive_insert" parameterType="nanoit.kr.domain.entity.SendAckEntity">
+    <insert id="receive_insert" parameterType="nanoit.kr.domain.before.SendAckEntityBefore">
         INSERT INTO receive (result, created_at, last_modified_at)
         VALUES (#{result}, #{createdAt}, #{lastModifiedAt});
     </insert>

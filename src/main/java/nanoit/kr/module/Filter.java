@@ -8,7 +8,7 @@ import nanoit.kr.domain.internaldata.InternalDataInsert;
 import nanoit.kr.domain.message.ErrorPayload;
 import nanoit.kr.domain.message.Payload;
 import nanoit.kr.domain.message.Report;
-import nanoit.kr.domain.message.SendAck;
+import nanoit.kr.domain.before.SendAckBefore;
 import nanoit.kr.extension.Jackson;
 import nanoit.kr.thread.ThreadResource;
 
@@ -42,9 +42,9 @@ public class Filter extends ModuleProcess {
 
                     switch (payload.getType()) {
                         case SEND_ACK:
-                            SendAck sendAck = Jackson.getInstance().getObjectMapper().convertValue(payload.getData(), SendAck.class);
-                            if (queue.publish(new InternalDataInsert(sendAck))) {
-                                log.debug("[FILTER] SEND_ACK SEND TO INSERT SUCCESS data :[{}]", sendAck);
+                            SendAckBefore sendAckBefore = Jackson.getInstance().getObjectMapper().convertValue(payload.getData(), SendAckBefore.class);
+                            if (queue.publish(new InternalDataInsert(sendAckBefore))) {
+                                log.debug("[FILTER] SEND_ACK SEND TO INSERT SUCCESS data :[{}]", sendAckBefore);
                             } else {
                                 log.warn("[MAPPER] SEND_ACK SEND TO INSERT FAILED");
                             }

@@ -2,7 +2,7 @@ package nanoit.kr.repository;
 
 import nanoit.kr.domain.PropertyDto;
 import nanoit.kr.domain.entity.MessageEntity;
-import nanoit.kr.domain.entity.SendAckEntity;
+import nanoit.kr.domain.before.SendAckEntityBefore;
 
 import java.io.IOException;
 import java.util.List;
@@ -27,6 +27,10 @@ public interface MessageRepository {
         };
     }
 
+    void settingPreferences();
+
+    boolean insertAgentId(long agentId);
+
 
     // Common Method
     long commonCount();
@@ -37,21 +41,29 @@ public interface MessageRepository {
 
     boolean commonDeleteById(long id);
 
-    boolean isExistById(long id);
+    MessageEntity selectById(long id);
 
     boolean insert(MessageEntity message);
 
     boolean insertAll(List<MessageEntity> list);
 
+
     // Receive Method
     long receiveCount();
 
-    MessageEntity receiveSelectById(long id);
+    SendAckEntityBefore receiveSelectById(long id);
 
     List<MessageEntity> receiveSelectAll();
 
     boolean receiveUpdate(long id);
 
+
+    // Send Method
+    List<MessageEntity> sendSelectAll();
+
+    boolean selectedUpdate(List<MessageEntity> list);
+
+    boolean sendResultUpdate(long id);
 
 }
 

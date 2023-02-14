@@ -2,8 +2,8 @@ package nanoit.kr.scheduler;
 
 import nanoit.kr.domain.internaldata.InternalDataType;
 import nanoit.kr.TemporaryQueue;
-import nanoit.kr.domain.entity.SendEntity;
-import nanoit.kr.domain.message.Send;
+import nanoit.kr.domain.before.SendEntityBefore;
+import nanoit.kr.domain.before.SendBefore;
 import nanoit.kr.extension.Jackson;
 import nanoit.kr.util.TestSetup;
 import org.junit.jupiter.api.AfterEach;
@@ -20,11 +20,11 @@ import static org.mockito.Mockito.spy;
 
 
 @Testcontainers
-class DataBaseSchedulerTest extends TestSetup {
+class DataBaseSchedulerBeforeTest extends TestSetup {
     private static TemporaryQueue queue;
-    private static DataBaseScheduler scheduler;
+    private static DataBaseSchedulerBefore scheduler;
 
-    public DataBaseSchedulerTest() throws IOException {
+    public DataBaseSchedulerBeforeTest() throws IOException {
         super("SEND");
         queue = spy(new TemporaryQueue());
     }
@@ -32,7 +32,7 @@ class DataBaseSchedulerTest extends TestSetup {
 
     @BeforeEach
     void setUp() {
-        scheduler = spy(new DataBaseScheduler(sendMessageService, queue));
+        scheduler = spy(new DataBaseSchedulerBefore(sendMessageService, queue));
     }
 
     @AfterEach
@@ -44,7 +44,7 @@ class DataBaseSchedulerTest extends TestSetup {
     @Test
     void t1() throws InterruptedException {
         // given
-        SendEntity expected = new SendEntity();
+        SendEntityBefore expected = new SendEntityBefore();
         int count = 10;
         for (int i = 0; i < count; i++) {
             expected
@@ -68,7 +68,7 @@ class DataBaseSchedulerTest extends TestSetup {
     @DisplayName("스케쥴러가 select 한 데이터와 queue 에 담은 데이터가 일치 하여야 한다")
     @Test
     void t2() throws InterruptedException {
-        SendEntity expected = new SendEntity();
+        SendEntityBefore expected = new SendEntityBefore();
         expected
                 .setId(0)
                 .setPhoneNum("010-4444-5555")
@@ -85,11 +85,11 @@ class DataBaseSchedulerTest extends TestSetup {
 
         // then
         Object object = queue.subscribe(InternalDataType.SENDER);
-        assertThat(object).isInstanceOf(Send.class);
-        Send send = Jackson.getInstance().getObjectMapper().convertValue(object, Send.class);
-        assertThat(send.getContent()).isEqualTo(expected.getContent());
-        assertThat(send.getName()).isEqualTo(expected.getName());
-        assertThat(send.getPhoneNum()).isEqualTo(expected.getPhoneNum());
-        assertThat(send.getCallback()).isEqualTo(expected.getCallback());
+        assertThat(object).isInstanceOf(SendBefore.class);
+        SendBefore sendBefore = Jackson.getInstance().getObjectMapper().convertValue(object, SendBefore.class);
+        assertThat(sendBefore.getContent()).isEqualTo(expected.getContent());
+        assertThat(sendBefore.getName()).isEqualTo(expected.getName());
+        assertThat(sendBefore.getPhoneNum()).isEqualTo(expected.getPhoneNum());
+        assertThat(sendBefore.getCallback()).isEqualTo(expected.getCallback());
     }
 }

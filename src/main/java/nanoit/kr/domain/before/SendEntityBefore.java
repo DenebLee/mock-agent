@@ -1,11 +1,10 @@
-package nanoit.kr.domain.entity;
+package nanoit.kr.domain.before;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import nanoit.kr.domain.message.MessageStatus;
-import nanoit.kr.domain.message.Send;
 
 import java.sql.Timestamp;
 
@@ -14,7 +13,7 @@ import java.sql.Timestamp;
 @NoArgsConstructor
 @Accessors(chain = true)
 
-public class SendEntity {
+public class SendEntityBefore {
     private long id;
     private MessageStatus status;
     private String phoneNum;
@@ -24,7 +23,7 @@ public class SendEntity {
     private Timestamp createdAt;
     private Timestamp lastModifiedAt;
 
-    public Send toDto() {
-        return new Send(phoneNum, callback, name, content);
+    public SendBefore toDto() {
+        return new SendBefore(phoneNum, callback, name, content);
     }
 }

@@ -1,8 +1,8 @@
 package nanoit.kr.service;
 
-import nanoit.kr.domain.entity.SendAckEntity;
+import nanoit.kr.domain.before.SendAckEntityBefore;
 import nanoit.kr.domain.message.MessageResult;
-import nanoit.kr.domain.message.SendAck;
+import nanoit.kr.domain.before.SendAckBefore;
 import nanoit.kr.util.TestSetup;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -30,7 +30,7 @@ class ReceiveMessageServiceImplTest extends TestSetup {
     @Test
     void t1() {
         // given
-        SendAck expected = new SendAck();
+        SendAckBefore expected = new SendAckBefore();
         Timestamp currentTime = new Timestamp(System.currentTimeMillis());
         expected
                 .setResult(MessageResult.SUCCESS)
@@ -42,7 +42,7 @@ class ReceiveMessageServiceImplTest extends TestSetup {
 
         // then
         assertThat(insertResult).isTrue();
-        SendAckEntity actual = receiveMessageRepository.selectById(1);
+        SendAckEntityBefore actual = receiveMessageRepository.selectById(1);
         assertThat(actual.getId()).isEqualTo(1);
         assertThat(actual.getResult()).isEqualTo(expected.getResult());
         assertThat(actual.getCreatedAt()).isEqualTo(expected.getCreatedAt());
@@ -54,7 +54,7 @@ class ReceiveMessageServiceImplTest extends TestSetup {
     @Test
     void t2() {
         // given
-        SendAck expected = new SendAck();
+        SendAckBefore expected = new SendAckBefore();
         for (int i = 0; i < 10; i++) {
             expected
                     .setResult(MessageResult.SUCCESS)
@@ -75,7 +75,7 @@ class ReceiveMessageServiceImplTest extends TestSetup {
     @Test
     void t3() {
         // given
-        SendAck expected = new SendAck();
+        SendAckBefore expected = new SendAckBefore();
         expected
                 .setResult(MessageResult.SUCCESS)
                 .setCreatedAt(new Timestamp(System.currentTimeMillis()))

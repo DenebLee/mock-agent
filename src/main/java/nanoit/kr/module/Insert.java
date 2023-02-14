@@ -5,7 +5,7 @@ import nanoit.kr.domain.internaldata.InternalDataType;
 import nanoit.kr.TemporaryQueue;
 import nanoit.kr.domain.internaldata.InternalDataInsert;
 import nanoit.kr.domain.message.Report;
-import nanoit.kr.domain.message.SendAck;
+import nanoit.kr.domain.before.SendAckBefore;
 import nanoit.kr.service.ReceiveMessageService;
 
 @Slf4j
@@ -31,10 +31,10 @@ public class Insert extends ModuleProcess {
                 if (object instanceof InternalDataInsert) {
                     InternalDataInsert internalDataInsert = (InternalDataInsert) object;
 
-                    if (internalDataInsert.getPayload() instanceof SendAck) {
-                        SendAck sendAck = (SendAck) internalDataInsert.getPayload();
-                        if (receiveMessageService.insertReceiveMessage(sendAck)) {
-                            log.debug("[INSERT] SEND_ACK SUCCESS TO INSERT RECEIVE_TABLE data : [{}]", sendAck);
+                    if (internalDataInsert.getPayload() instanceof SendAckBefore) {
+                        SendAckBefore sendAckBefore = (SendAckBefore) internalDataInsert.getPayload();
+                        if (receiveMessageService.insertReceiveMessage(sendAckBefore)) {
+                            log.debug("[INSERT] SEND_ACK SUCCESS TO INSERT RECEIVE_TABLE data : [{}]", sendAckBefore);
                         }
                     } else if (internalDataInsert.getPayload() instanceof Report) {
                         // some code;

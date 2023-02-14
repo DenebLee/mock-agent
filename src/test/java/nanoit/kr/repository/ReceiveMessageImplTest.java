@@ -1,7 +1,7 @@
 package nanoit.kr.repository;
 
 import nanoit.kr.util.TestSetup;
-import nanoit.kr.domain.entity.SendAckEntity;
+import nanoit.kr.domain.before.SendAckEntityBefore;
 import nanoit.kr.domain.message.MessageResult;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -30,7 +30,7 @@ class ReceiveMessageImplTest extends TestSetup {
     @Test
     void t1() {
         // given
-        SendAckEntity expected = new SendAckEntity();
+        SendAckEntityBefore expected = new SendAckEntityBefore();
         expected.setResult(MessageResult.SUCCESS)
                 .setCreatedAt(new Timestamp(System.currentTimeMillis()))
                 .setLastModifiedAt(new Timestamp(System.currentTimeMillis()));
@@ -57,7 +57,7 @@ class ReceiveMessageImplTest extends TestSetup {
     @Test
     void t3() {
         // given
-        SendAckEntity expected = new SendAckEntity();
+        SendAckEntityBefore expected = new SendAckEntityBefore();
         boolean insertResult = false;
         int count = 10;
         for (int i = 0; i < count; i++) {
@@ -68,12 +68,12 @@ class ReceiveMessageImplTest extends TestSetup {
         }
 
         // when
-        List<SendAckEntity> actual = receiveMessageRepository.selectAll();
+        List<SendAckEntityBefore> actual = receiveMessageRepository.selectAll();
 
         // then
         assertThat(insertResult).isTrue();
         assertThat(actual.size()).isEqualTo(count);
-        for (SendAckEntity send : actual) {
+        for (SendAckEntityBefore send : actual) {
             assertThat(send.getResult()).isEqualTo(expected.getResult());
         }
 
@@ -83,11 +83,11 @@ class ReceiveMessageImplTest extends TestSetup {
     @Test
     void t4() {
         // given
-        SendAckEntity sendAckEntity = new SendAckEntity();
-        sendAckEntity.setResult(MessageResult.SUCCESS)
+        SendAckEntityBefore sendAckEntityBefore = new SendAckEntityBefore();
+        sendAckEntityBefore.setResult(MessageResult.SUCCESS)
                 .setCreatedAt(new Timestamp(System.currentTimeMillis()))
                 .setLastModifiedAt(new Timestamp(System.currentTimeMillis()));
-        boolean insertResult = receiveMessageRepository.insert(sendAckEntity);
+        boolean insertResult = receiveMessageRepository.insert(sendAckEntityBefore);
 
         // when
         boolean actual = receiveMessageRepository.deleteAll();
@@ -103,12 +103,12 @@ class ReceiveMessageImplTest extends TestSetup {
     @Test
     void t5() {
         // given
-        SendAckEntity sendAckEntity = new SendAckEntity();
-        sendAckEntity
+        SendAckEntityBefore sendAckEntityBefore = new SendAckEntityBefore();
+        sendAckEntityBefore
                 .setResult(MessageResult.SUCCESS)
                 .setCreatedAt(new Timestamp(System.currentTimeMillis()))
                 .setLastModifiedAt(new Timestamp(System.currentTimeMillis()));
-        boolean insertResult = receiveMessageRepository.insert(sendAckEntity);
+        boolean insertResult = receiveMessageRepository.insert(sendAckEntityBefore);
 
         // when
         boolean actual = receiveMessageRepository.deleteById(1);
@@ -123,7 +123,7 @@ class ReceiveMessageImplTest extends TestSetup {
     @Test
     void t6() {
         // given
-        SendAckEntity expected = new SendAckEntity();
+        SendAckEntityBefore expected = new SendAckEntityBefore();
         Timestamp currentTime = new Timestamp(System.currentTimeMillis());
         expected
                 .setResult(MessageResult.SUCCESS)
@@ -132,7 +132,7 @@ class ReceiveMessageImplTest extends TestSetup {
         boolean insertResult = receiveMessageRepository.insert(expected);
 
         // when
-        SendAckEntity actual = receiveMessageRepository.selectById(1);
+        SendAckEntityBefore actual = receiveMessageRepository.selectById(1);
 
         // then
         assertThat(insertResult).isTrue();

@@ -1,7 +1,7 @@
 package nanoit.kr.repository;
 
 import nanoit.kr.db.DataBaseSessionManager;
-import nanoit.kr.domain.entity.SendEntity;
+import nanoit.kr.domain.before.SendEntityBefore;
 import nanoit.kr.exception.DeleteFailedException;
 import nanoit.kr.exception.InsertFailedException;
 import nanoit.kr.exception.SelectFailedException;
@@ -57,9 +57,9 @@ public class SendMessageRepositoryImpl implements SendMessageRepository {
     }
 
     @Override
-    public boolean updateMessageStatus(SendEntity sendEntity) {
+    public boolean updateMessageStatus(SendEntityBefore sendEntityBefore) {
         try (SqlSession session = sessionManager.getSqlSession(true)) {
-            int result = session.update("send_updateMessageStatus", sendEntity);
+            int result = session.update("send_updateMessageStatus", sendEntityBefore);
             if (result > 0) {
                 return true;
             }
@@ -70,7 +70,7 @@ public class SendMessageRepositoryImpl implements SendMessageRepository {
     }
 
     @Override
-    public SendEntity selectById(long id) {
+    public SendEntityBefore selectById(long id) {
         try (SqlSession session = sessionManager.getSqlSession(true)) {
             return session.selectOne("send_selectById", id);
         } catch (Exception e) {
@@ -79,9 +79,9 @@ public class SendMessageRepositoryImpl implements SendMessageRepository {
     }
 
     @Override
-    public List<SendEntity> selectAll() {
+    public List<SendEntityBefore> selectAll() {
         try (SqlSession session = sessionManager.getSqlSession(true)) {
-            List<SendEntity> selectList = session.selectList("send_selectAll");
+            List<SendEntityBefore> selectList = session.selectList("send_selectAll");
             if (!selectList.isEmpty()) {
                 return selectList;
             }
@@ -101,7 +101,7 @@ public class SendMessageRepositoryImpl implements SendMessageRepository {
     }
 
     @Override
-    public boolean insert(SendEntity send) {
+    public boolean insert(SendEntityBefore send) {
         try (SqlSession session = sessionManager.getSqlSession(true)) {
             int result = session.insert("send_insert", send);
             if (result > 0) {
@@ -131,9 +131,9 @@ public class SendMessageRepositoryImpl implements SendMessageRepository {
     }
 
     @Override
-    public List<SendEntity> selectAllById(long id) {
+    public List<SendEntityBefore> selectAllById(long id) {
         try (SqlSession session = sessionManager.getSqlSession(true)) {
-            List<SendEntity> selectList = session.selectList("test", id);
+            List<SendEntityBefore> selectList = session.selectList("test", id);
             if (selectList.isEmpty()) {
                 return null;
             }
@@ -144,7 +144,7 @@ public class SendMessageRepositoryImpl implements SendMessageRepository {
     }
 
     @Override
-    public boolean insertAll(List<SendEntity> list) {
+    public boolean insertAll(List<SendEntityBefore> list) {
         try (SqlSession session = sessionManager.getSqlSession(true)) {
             int a = session.insert("send_insertAll", list);
             return a == list.size();

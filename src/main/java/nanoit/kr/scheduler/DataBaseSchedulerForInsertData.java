@@ -1,17 +1,12 @@
 package nanoit.kr.scheduler;
 
 import lombok.extern.slf4j.Slf4j;
-import nanoit.kr.TemporaryQueue;
-import nanoit.kr.domain.entity.SendEntity;
-import nanoit.kr.domain.message.Send;
-import nanoit.kr.service.ReceiveMessageService;
+import nanoit.kr.domain.before.SendEntityBefore;
 import nanoit.kr.service.SendMessageService;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Scanner;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -33,11 +28,11 @@ public class DataBaseSchedulerForInsertData {
             try {
                 int limit = 1;
                 int count = 0;
-                SendEntity sendEntity = new SendEntity();
-                List<SendEntity> list = new ArrayList<>();
+                SendEntityBefore sendEntityBefore = new SendEntityBefore();
+                List<SendEntityBefore> list = new ArrayList<>();
                 do {
                     count++;
-                    sendEntity
+                    sendEntityBefore
                             .setId(0)
                             .setPhoneNum("010-4444-5555")
                             .setCallback("053-444-5555")
@@ -45,7 +40,7 @@ public class DataBaseSchedulerForInsertData {
                             .setContent("안녕하세요" + count)
                             .setCreatedAt(new Timestamp(System.currentTimeMillis()))
                             .setLastModifiedAt(new Timestamp(System.currentTimeMillis()));
-                    list.add(sendEntity);
+                    list.add(sendEntityBefore);
                 } while (count < limit);
                 if (sendMessageService.insertAll(list)) {
                     log.info("[SCHEDULER-INSERT-DATA] INSERT SUCCESS  total count : [{}]", list.size());

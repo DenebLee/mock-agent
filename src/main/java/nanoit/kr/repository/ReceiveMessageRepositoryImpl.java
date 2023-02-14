@@ -1,7 +1,7 @@
 package nanoit.kr.repository;
 
 import nanoit.kr.db.DataBaseSessionManager;
-import nanoit.kr.domain.entity.SendAckEntity;
+import nanoit.kr.domain.before.SendAckEntityBefore;
 import nanoit.kr.exception.DeleteFailedException;
 import nanoit.kr.exception.InsertFailedException;
 import nanoit.kr.exception.SelectFailedException;
@@ -41,7 +41,7 @@ public class ReceiveMessageRepositoryImpl implements ReceiveMessageRepository {
     }
 
     @Override
-    public SendAckEntity selectById(long id) {
+    public SendAckEntityBefore selectById(long id) {
         try (SqlSession session = sessionManager.getSqlSession(true)) {
             return session.selectOne("receive_selectById", id);
         } catch (Exception e) {
@@ -80,9 +80,9 @@ public class ReceiveMessageRepositoryImpl implements ReceiveMessageRepository {
     }
 
     @Override
-    public List<SendAckEntity> selectAll() throws SelectFailedException {
+    public List<SendAckEntityBefore> selectAll() throws SelectFailedException {
         try (SqlSession session = sessionManager.getSqlSession(true)) {
-            List<SendAckEntity> listData = session.selectList("receive_selectAll");
+            List<SendAckEntityBefore> listData = session.selectList("receive_selectAll");
             if (!listData.isEmpty()) {
                 return listData;
             }
@@ -94,7 +94,7 @@ public class ReceiveMessageRepositoryImpl implements ReceiveMessageRepository {
 
 
     @Override
-    public boolean insert(SendAckEntity sendAck) {
+    public boolean insert(SendAckEntityBefore sendAck) {
         try (SqlSession session = sessionManager.getSqlSession(true)) {
             int result = session.insert("receive_insert", sendAck);
             if (result > 0) {

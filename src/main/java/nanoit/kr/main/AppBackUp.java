@@ -6,7 +6,7 @@ import nanoit.kr.db.DatabaseHandler;
 import nanoit.kr.module.Filter;
 import nanoit.kr.module.Insert;
 import nanoit.kr.module.Mapper;
-import nanoit.kr.scheduler.DataBaseScheduler;
+import nanoit.kr.scheduler.DataBaseSchedulerBefore;
 import nanoit.kr.scheduler.DataBaseSchedulerForInsertData;
 import nanoit.kr.service.ReceiveMessageService;
 import nanoit.kr.service.SendMessageService;
@@ -52,7 +52,7 @@ public class AppBackUp {
                     socket.connect(new InetSocketAddress(properties.getProperty("tcp.url"), Integer.parseInt(properties.getProperty("tcp.port"))));
 
 
-                    DataBaseScheduler dataBaseScheduler = new DataBaseScheduler(sendMessageService, queue);
+                    DataBaseSchedulerBefore dataBaseSchedulerBefore = new DataBaseSchedulerBefore(sendMessageService, queue);
 
                     ThreadResource threadResource = new ThreadResource(receivedMessageService, sendMessageService, socket, queue, properties);
 

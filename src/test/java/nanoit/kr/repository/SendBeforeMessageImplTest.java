@@ -2,7 +2,7 @@ package nanoit.kr.repository;
 
 
 import nanoit.kr.util.TestSetup;
-import nanoit.kr.domain.entity.SendEntity;
+import nanoit.kr.domain.before.SendEntityBefore;
 import nanoit.kr.domain.message.MessageStatus;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -17,8 +17,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 
 @Testcontainers
-class SendMessageImplTest extends TestSetup {
-    public SendMessageImplTest() throws IOException {
+class SendBeforeMessageImplTest extends TestSetup {
+    public SendBeforeMessageImplTest() throws IOException {
         super("SEND");
     }
 
@@ -31,7 +31,7 @@ class SendMessageImplTest extends TestSetup {
     @Test
     void t1() {
         // given
-        SendEntity expected = new SendEntity();
+        SendEntityBefore expected = new SendEntityBefore();
         int count = 10;
         for (int i = 0; i < count; i++) {
             expected
@@ -57,7 +57,7 @@ class SendMessageImplTest extends TestSetup {
     @Test
     void t2() {
         // given
-        SendEntity expected = new SendEntity();
+        SendEntityBefore expected = new SendEntityBefore();
         int count = 10;
         for (int i = 0; i < count; i++) {
             expected
@@ -87,7 +87,7 @@ class SendMessageImplTest extends TestSetup {
     @Test
     void t3() {
         // given
-        SendEntity expected = new SendEntity();
+        SendEntityBefore expected = new SendEntityBefore();
         expected
                 .setId(0)
                 .setPhoneNum("010-4444-5555")
@@ -97,7 +97,7 @@ class SendMessageImplTest extends TestSetup {
                 .setCreatedAt(new Timestamp(System.currentTimeMillis()))
                 .setLastModifiedAt(new Timestamp(System.currentTimeMillis()));
         boolean insertResult = sendMessageRepository.insert(expected);
-        SendEntity inputUpdateValue = new SendEntity();
+        SendEntityBefore inputUpdateValue = new SendEntityBefore();
         inputUpdateValue
                 .setId(1)
                 .setStatus(MessageStatus.SENT);
@@ -108,7 +108,7 @@ class SendMessageImplTest extends TestSetup {
         // then
         assertThat(insertResult).isTrue();
         assertThat(updateResult).isTrue();
-        SendEntity updateResultEntity = sendMessageRepository.selectById(1);
+        SendEntityBefore updateResultEntity = sendMessageRepository.selectById(1);
         assertThat(updateResultEntity.getStatus()).isEqualTo(MessageStatus.SENT);
     }
 
@@ -117,7 +117,7 @@ class SendMessageImplTest extends TestSetup {
     @Test
     void t4() {
         // given
-        SendEntity expected = new SendEntity();
+        SendEntityBefore expected = new SendEntityBefore();
         Timestamp currentTime = new Timestamp(System.currentTimeMillis());
         expected
                 .setId(0)
@@ -130,7 +130,7 @@ class SendMessageImplTest extends TestSetup {
         boolean insertResult = sendMessageRepository.insert(expected);
 
         // when
-        SendEntity actual = sendMessageRepository.selectById(1);
+        SendEntityBefore actual = sendMessageRepository.selectById(1);
 
         // then
         assertThat(actual.getId()).isEqualTo(1);
@@ -147,7 +147,7 @@ class SendMessageImplTest extends TestSetup {
     @Test
     void t5() {
         // given
-        SendEntity expected = new SendEntity();
+        SendEntityBefore expected = new SendEntityBefore();
         int count = 10;
         for (int i = 0; i < count; i++) {
             expected
@@ -162,7 +162,7 @@ class SendMessageImplTest extends TestSetup {
         }
 
         // when
-        List<SendEntity> actual = sendMessageRepository.selectAll();
+        List<SendEntityBefore> actual = sendMessageRepository.selectAll();
 
         // then
         assertThat(actual.size()).isEqualTo(count);
@@ -185,7 +185,7 @@ class SendMessageImplTest extends TestSetup {
     @Test
     void t7() {
         // given
-        SendEntity expected = new SendEntity();
+        SendEntityBefore expected = new SendEntityBefore();
         Timestamp currentTime = new Timestamp(System.currentTimeMillis());
         expected
                 .setId(0)
@@ -202,7 +202,7 @@ class SendMessageImplTest extends TestSetup {
 
         // then
         assertThat(insertResult).isTrue();
-        SendEntity actual = sendMessageRepository.selectById(1);
+        SendEntityBefore actual = sendMessageRepository.selectById(1);
         assertThat(actual.getName()).isEqualTo(expected.getName());
         assertThat(actual.getCallback()).isEqualTo(expected.getCallback());
         assertThat(actual.getPhoneNum()).isEqualTo(expected.getPhoneNum());
@@ -217,7 +217,7 @@ class SendMessageImplTest extends TestSetup {
     @Test
     void t8() {
         // given
-        SendEntity expected = new SendEntity();
+        SendEntityBefore expected = new SendEntityBefore();
         Timestamp currentTime = new Timestamp(System.currentTimeMillis());
         expected
                 .setId(0)

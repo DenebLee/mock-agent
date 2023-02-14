@@ -1,4 +1,4 @@
-package nanoit.kr.domain.message;
+package nanoit.kr.domain.before;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,10 +9,10 @@ import lombok.experimental.Accessors;
 @AllArgsConstructor
 @NoArgsConstructor
 @Accessors(chain = true)
-public class Send {
-    private long id;
-    private String phoneNumber;
-    private String callbackNumber;
-    private String senderName;
+
+public class SendBefore {
+    private String phoneNum;
+    private String callback;
+    private String name;
     private String content;
 }

@@ -1,6 +1,6 @@
 package nanoit.kr.service;
 
-import nanoit.kr.domain.entity.SendEntity;
+import nanoit.kr.domain.before.SendEntityBefore;
 import nanoit.kr.domain.message.MessageStatus;
 import nanoit.kr.util.TestSetup;
 import org.junit.jupiter.api.AfterEach;
@@ -16,9 +16,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 
 @Testcontainers
-class SendMessageServiceImplTest extends TestSetup {
+class SendBeforeMessageServiceImplTest extends TestSetup {
 
-    public SendMessageServiceImplTest() throws IOException {
+    public SendBeforeMessageServiceImplTest() throws IOException {
         super("SEND");
     }
 
@@ -31,7 +31,7 @@ class SendMessageServiceImplTest extends TestSetup {
     @Test
     void t1() {
         // given
-        SendEntity expected = new SendEntity();
+        SendEntityBefore expected = new SendEntityBefore();
         int count = 10;
         for (int i = 0; i < count; i++) {
             expected
@@ -47,7 +47,7 @@ class SendMessageServiceImplTest extends TestSetup {
         }
 
         // when
-        List<SendEntity> resultList = sendMessageService.selectSendMessages();
+        List<SendEntityBefore> resultList = sendMessageService.selectSendMessages();
 
         // then
         assertThat(resultList.size()).isEqualTo(count);
@@ -59,7 +59,7 @@ class SendMessageServiceImplTest extends TestSetup {
     @Test
     void t2() {
         // given
-        SendEntity expected = new SendEntity();
+        SendEntityBefore expected = new SendEntityBefore();
         expected
                 .setId(0)
                 .setPhoneNum("010-4444-5555")
@@ -75,7 +75,7 @@ class SendMessageServiceImplTest extends TestSetup {
 
         // then
         assertThat(insertResult).isTrue();
-        SendEntity actual = sendMessageRepository.selectById(1);
+        SendEntityBefore actual = sendMessageRepository.selectById(1);
         assertThat(result).isTrue();
         assertThat(actual.getStatus()).isEqualTo(expected.getStatus());
     }
@@ -84,7 +84,7 @@ class SendMessageServiceImplTest extends TestSetup {
     @Test
     void t3() {
         // given
-        SendEntity expected = new SendEntity();
+        SendEntityBefore expected = new SendEntityBefore();
         for (int i = 0; i < 10; i++) {
             expected
                     .setId(0)
@@ -112,7 +112,7 @@ class SendMessageServiceImplTest extends TestSetup {
     @Test
     void t4() {
         // given
-        SendEntity expected = new SendEntity();
+        SendEntityBefore expected = new SendEntityBefore();
         int count = 10;
         for (int i = 0; i < count; i++) {
             expected
@@ -132,7 +132,7 @@ class SendMessageServiceImplTest extends TestSetup {
 
         // then
         assertThat(countResult).isEqualTo(count);
-        List<SendEntity> list = sendMessageService.selectSendMessages();
+        List<SendEntityBefore> list = sendMessageService.selectSendMessages();
         assertThat(list.size()).isEqualTo(countResult);
 
     }
