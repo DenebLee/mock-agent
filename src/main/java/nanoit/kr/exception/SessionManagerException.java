@@ -1,9 +1,9 @@
 package nanoit.kr.exception;
 
-public class DataNullException extends RuntimeException {
+public class SessionManagerException extends RuntimeException {
     private final String reason;
 
-    public DataNullException(String reason) {
+    public SessionManagerException(String reason) {
         super(reason);
         this.reason = reason;
     }

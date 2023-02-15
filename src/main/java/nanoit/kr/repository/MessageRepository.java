@@ -3,6 +3,7 @@ package nanoit.kr.repository;
 import nanoit.kr.domain.PropertyDto;
 import nanoit.kr.domain.entity.MessageEntity;
 import nanoit.kr.domain.before.SendAckEntityBefore;
+import org.apache.ibatis.session.SqlSession;
 
 import java.io.IOException;
 import java.util.List;
@@ -22,8 +23,8 @@ import java.util.List;
  */
 
 public interface MessageRepository {
-    static MessageRepository createMessageRepository(PropertyDto dto) throws IOException {
-        return new MessageRepositoryImpl(dto) {
+    static MessageRepository createMessageRepository(SqlSession session) throws IOException {
+        return new MessageRepositoryImpl(session) {
         };
     }
 

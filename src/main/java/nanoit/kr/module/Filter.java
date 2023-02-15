@@ -2,7 +2,7 @@ package nanoit.kr.module;
 
 import lombok.extern.slf4j.Slf4j;
 import nanoit.kr.domain.internaldata.InternalDataType;
-import nanoit.kr.TemporaryQueue;
+import nanoit.kr.InternalQueue;
 import nanoit.kr.domain.internaldata.InternalDataFilter;
 import nanoit.kr.domain.internaldata.InternalDataInsert;
 import nanoit.kr.domain.message.ErrorPayload;
@@ -10,17 +10,14 @@ import nanoit.kr.domain.message.Payload;
 import nanoit.kr.domain.message.Report;
 import nanoit.kr.domain.before.SendAckBefore;
 import nanoit.kr.extension.Jackson;
-import nanoit.kr.thread.ThreadResource;
 
 @Slf4j
 public class Filter extends ModuleProcess {
 
-    private final TemporaryQueue queue;
-    private final ThreadResource threadResource;
+    private final InternalQueue queue;
 
-    public Filter(String uuid, TemporaryQueue queue, ThreadResource threadResource) {
+    public Filter(String uuid, InternalQueue queue) {
         super(queue, uuid);
-        this.threadResource = threadResource;
         this.queue = queue;
     }
 
@@ -51,7 +48,6 @@ public class Filter extends ModuleProcess {
                             break;
 
                         case AUTHENTICATION_ACK:
-                            threadResource.setAuthenticationStatus();
                             log.info("[FILTER] AUTHENTICATION SUCCESS !! ");
                             break;
 

@@ -1,10 +1,9 @@
 package nanoit.kr.repository;
 
-import nanoit.kr.db.DataBaseSessionManagerTest;
+import nanoit.kr.db.DataBaseSessionManager;
 import nanoit.kr.domain.PropertyDto;
-import nanoit.kr.domain.entity.MessageEntity;
 import nanoit.kr.domain.before.SendAckEntityBefore;
-import nanoit.kr.domain.before.SendEntityBefore;
+import nanoit.kr.domain.entity.MessageEntity;
 import nanoit.kr.exception.DeleteFailedException;
 import nanoit.kr.exception.InsertFailedException;
 import nanoit.kr.exception.SelectFailedException;
@@ -24,16 +23,16 @@ import java.util.List;
 
 public class MessageRepositoryImpl implements MessageRepository {
 
-    private final DataBaseSessionManagerTest sessionManager;
+    private final SqlSession session;
 
-    public MessageRepositoryImpl(PropertyDto dto) throws IOException {
-        this.sessionManager = new DataBaseSessionManagerTest(dto);
+    public MessageRepositoryImpl(SqlSession session)  {
         settingPreferences();
+        this.session = session;
     }
 
     @Override
     public void settingPreferences() {
-        try (SqlSession session = sessionManager.getSqlSession(true)) {
+        try {
             session.update("createTable");
             session.update("createdMessage_selected");
             session.update("createMessageResultTable");
@@ -47,7 +46,7 @@ public class MessageRepositoryImpl implements MessageRepository {
 
     @Override
     public boolean insertAgentId(long agentId) {
-        try (SqlSession session = sessionManager.getSqlSession(true)) {
+        try {
             int a = session.insert("agent_id_insert", agentId);
             if (a > 0) {
                 return true;
@@ -60,7 +59,7 @@ public class MessageRepositoryImpl implements MessageRepository {
 
     @Override
     public long commonCount() {
-        try (SqlSession session = sessionManager.getSqlSession(true)) {
+        try {
             return session.selectOne("count");
         } catch (Exception e) {
             throw new SelectFailedException("Failed to Total count lookup failed => " + e.getMessage());
@@ -69,7 +68,7 @@ public class MessageRepositoryImpl implements MessageRepository {
 
     @Override
     public boolean commonPing() {
-        try (SqlSession session = sessionManager.getSqlSession(true)) {
+        try {
             return session.selectOne("ping");
         } catch (Exception e) {
             throw new SelectFailedException("The agent Table is not Created => " + e.getMessage());
@@ -78,7 +77,7 @@ public class MessageRepositoryImpl implements MessageRepository {
 
     @Override
     public boolean commonDeleteTable() {
-        try (SqlSession session = sessionManager.getSqlSession(true)) {
+        try {
             int a = session.delete("deleteTable");
             if (a > 0) {
                 return true;
@@ -91,7 +90,7 @@ public class MessageRepositoryImpl implements MessageRepository {
 
     @Override
     public boolean commonDeleteById(long id) {
-        try (SqlSession session = sessionManager.getSqlSession(true)) {
+        try {
             int a = session.delete("deleteByid", id);
             if (a > 0) {
                 return true;
@@ -104,8 +103,7 @@ public class MessageRepositoryImpl implements MessageRepository {
 
     @Override
     public MessageEntity selectById(long id) {
-        // 프로시저 이용해서 select 한 직후 바로 update 해서 selected 데이터 삽입 가능 하도록
-        try (SqlSession session = sessionManager.getSqlSession(true)) {
+        try {
             return session.selectOne("selectById", id);
         } catch (Exception e) {
             throw new SelectFailedException("Failed to Delete Receive Message => " + e.getMessage());
@@ -114,7 +112,7 @@ public class MessageRepositoryImpl implements MessageRepository {
 
     @Override
     public boolean insert(MessageEntity message) {
-        try (SqlSession session = sessionManager.getSqlSession(true)) {
+        try {
             int a = session.insert("insert", message);
             if (a > 0) {
                 return true;
@@ -127,7 +125,7 @@ public class MessageRepositoryImpl implements MessageRepository {
 
     @Override
     public boolean insertAll(List<MessageEntity> list) {
-        try (SqlSession session = sessionManager.getSqlSession(true)) {
+        try {
             int a = session.insert("insertAll", list);
             if (a > 0) {
                 return true;
@@ -142,7 +140,7 @@ public class MessageRepositoryImpl implements MessageRepository {
     // Receive
     @Override
     public long receiveCount() {
-        try (SqlSession session = sessionManager.getSqlSession(true)) {
+        try {
             return session.selectOne("receive_count");
         } catch (Exception e) {
             throw new SelectFailedException("Failed to Total count lookup failed => " + e.getMessage());
@@ -151,7 +149,7 @@ public class MessageRepositoryImpl implements MessageRepository {
 
     @Override
     public SendAckEntityBefore receiveSelectById(long id) {
-        try (SqlSession session = sessionManager.getSqlSession(true)) {
+        try {
             return session.selectOne("receive_selectById", id);
         } catch (Exception e) {
             throw new SelectFailedException("Failed to Select By Id => " + e.getMessage());
@@ -160,7 +158,7 @@ public class MessageRepositoryImpl implements MessageRepository {
 
     @Override
     public List<MessageEntity> receiveSelectAll() {
-        try (SqlSession session = sessionManager.getSqlSession(true)) {
+        try {
             return session.selectList("receive_selectAll");
         } catch (Exception e) {
             throw new SelectFailedException("Failed to Select By Id => " + e.getMessage());
@@ -169,7 +167,7 @@ public class MessageRepositoryImpl implements MessageRepository {
 
     @Override
     public boolean receiveUpdate(long id) {
-        try (SqlSession session = sessionManager.getSqlSession(true)) {
+        try {
             int a = session.update("receive_update", id);
             if (a > 0) {
                 return true;
@@ -184,7 +182,7 @@ public class MessageRepositoryImpl implements MessageRepository {
     // Send
     @Override
     public List<MessageEntity> sendSelectAll() {
-        try (SqlSession session = sessionManager.getSqlSession(true)) {
+        try {
             return session.selectList("send_selectAll");
         } catch (Exception e) {
             throw new SelectFailedException("Failed to Select All Message => " + e.getMessage());
@@ -193,7 +191,7 @@ public class MessageRepositoryImpl implements MessageRepository {
 
     @Override
     public boolean selectedUpdate(List<MessageEntity> list) {
-        try (SqlSession session = sessionManager.getSqlSession(true)) {
+        try {
             int a = session.update("send_select_update", list);
             if (a > 0) {
                 return true;
@@ -206,7 +204,7 @@ public class MessageRepositoryImpl implements MessageRepository {
 
     @Override
     public boolean sendResultUpdate(long id) {
-        try (SqlSession session = sessionManager.getSqlSession(true)) {
+        try {
             int a = session.update("send_result_update", id);
             if (a > 0) {
                 return true;

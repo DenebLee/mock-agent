@@ -3,7 +3,7 @@ package nanoit.kr.module;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
 import nanoit.kr.domain.internaldata.InternalDataType;
-import nanoit.kr.TemporaryQueue;
+import nanoit.kr.InternalQueue;
 import nanoit.kr.domain.internaldata.InternalDataFilter;
 import nanoit.kr.domain.internaldata.InternalDataMapper;
 import nanoit.kr.domain.internaldata.InternalDataSender;
@@ -13,9 +13,9 @@ import nanoit.kr.extension.Jackson;
 @Slf4j
 public class Mapper extends ModuleProcess {
 
-    private final TemporaryQueue queue;
+    private final InternalQueue queue;
 
-    public Mapper(String uuid, TemporaryQueue queue) {
+    public Mapper(String uuid, InternalQueue queue) {
         super(queue, uuid);
         this.queue = queue;
     }

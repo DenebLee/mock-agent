@@ -1,6 +1,8 @@
 package nanoit.kr.service;
 
+import com.sun.org.apache.bcel.internal.generic.ARETURN;
 import lombok.extern.slf4j.Slf4j;
+import nanoit.kr.domain.PropertyDto;
 import nanoit.kr.domain.entity.MessageEntity;
 import nanoit.kr.domain.message.Send;
 import nanoit.kr.exception.SelectFailedException;
@@ -95,6 +97,9 @@ public class MessageServiceImpl implements MessageService {
             return messageRepository.receiveUpdate(id);
         } catch (UpdateFailedException e) {
             log.error(e.getReason());
+
         }
+        return false;
     }
+
 }

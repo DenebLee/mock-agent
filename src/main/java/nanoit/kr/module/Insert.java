@@ -1,24 +1,19 @@
 package nanoit.kr.module;
 
 import lombok.extern.slf4j.Slf4j;
-import nanoit.kr.domain.internaldata.InternalDataType;
-import nanoit.kr.TemporaryQueue;
-import nanoit.kr.domain.internaldata.InternalDataInsert;
-import nanoit.kr.domain.message.Report;
-import nanoit.kr.domain.before.SendAckBefore;
-import nanoit.kr.service.ReceiveMessageService;
+import nanoit.kr.InternalQueue;
+import nanoit.kr.service.MessageService;
 
 @Slf4j
 public class Insert extends ModuleProcess {
 
-    private final TemporaryQueue queue;
-    private final ReceiveMessageService receiveMessageService;
+    private final InternalQueue queue;
+    private final MessageService messageService;
 
-    public Insert(String uuid, TemporaryQueue queue, ReceiveMessageService receiveMessageService) {
+    public Insert(String uuid, InternalQueue queue, MessageService messageService) {
         super(queue, uuid);
-
         this.queue = queue;
-        this.receiveMessageService = receiveMessageService;
+        this.messageService = messageService;
     }
 
 
@@ -26,20 +21,7 @@ public class Insert extends ModuleProcess {
     public void run() {
         try {
             while (true) {
-                Object object = queue.subscribe(InternalDataType.Filter);
 
-                if (object instanceof InternalDataInsert) {
-                    InternalDataInsert internalDataInsert = (InternalDataInsert) object;
-
-                    if (internalDataInsert.getPayload() instanceof SendAckBefore) {
-                        SendAckBefore sendAckBefore = (SendAckBefore) internalDataInsert.getPayload();
-                        if (receiveMessageService.insertReceiveMessage(sendAckBefore)) {
-                            log.debug("[INSERT] SEND_ACK SUCCESS TO INSERT RECEIVE_TABLE data : [{}]", sendAckBefore);
-                        }
-                    } else if (internalDataInsert.getPayload() instanceof Report) {
-                        // some code;
-                    }
-                }
             }
         } catch (Exception e) {
             e.printStackTrace();

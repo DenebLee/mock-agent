@@ -1,33 +1,26 @@
 package nanoit.kr.db;
 
 import lombok.extern.slf4j.Slf4j;
-import nanoit.kr.repository.ReceiveMessageRepository;
-import nanoit.kr.repository.SendMessageRepository;
-import nanoit.kr.service.ReceiveMessageService;
-import nanoit.kr.service.ReceiveMessageServiceImpl;
-import nanoit.kr.service.SendMessageService;
-import nanoit.kr.service.SendMessageServiceImpl;
+import nanoit.kr.domain.PropertyDto;
+import nanoit.kr.repository.MessageRepository;
+import nanoit.kr.service.MessageService;
+import nanoit.kr.service.MessageServiceImpl;
+import org.apache.ibatis.session.SqlSession;
 
 import java.io.IOException;
-import java.util.Properties;
 
 @Slf4j
 public class DatabaseHandler {
-    private final Properties properties;
+    private final PropertyDto dto;
 
-
-    public DatabaseHandler(Properties properties) {
-        this.properties = properties;
+    public DatabaseHandler(PropertyDto dto) {
+        this.dto = dto;
     }
 
-    public ReceiveMessageService getReceivedMessageService() throws IOException {
-        ReceiveMessageRepository receiveMessageRepository = ReceiveMessageRepository.createReceiveRepository(properties);
-        return new ReceiveMessageServiceImpl(receiveMessageRepository);
-    }
 
-    public SendMessageService getSendMessageService() throws IOException {
-        SendMessageRepository sendMessageRepository = SendMessageRepository.createSendRepository(properties);
-        return new SendMessageServiceImpl(sendMessageRepository);
+    public MessageService getMessageService(SqlSession session) throws IOException {
+        MessageRepository messageRepository = MessageRepository.createMessageRepository(session);
+        return new MessageServiceImpl(messageRepository);
     }
 
 }

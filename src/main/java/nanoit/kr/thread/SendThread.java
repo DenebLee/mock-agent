@@ -2,7 +2,7 @@ package nanoit.kr.thread;
 
 import lombok.extern.slf4j.Slf4j;
 import nanoit.kr.domain.internaldata.InternalDataType;
-import nanoit.kr.TemporaryQueue;
+import nanoit.kr.InternalQueue;
 import nanoit.kr.domain.internaldata.InternalDataSender;
 
 import java.io.BufferedWriter;
@@ -14,11 +14,11 @@ import java.util.function.Consumer;
 public class SendThread implements Runnable {
     private final Consumer<String> cleaner;
     private final BufferedWriter bufferedWriter;
-    private final TemporaryQueue queue;
+    private final InternalQueue queue;
     private AtomicBoolean authenticationStatus;
     private AtomicBoolean sendThreadStatus;
 
-    public SendThread(Consumer<String> cleaner, TemporaryQueue queue, BufferedWriter bufferedWriter, AtomicBoolean authenticationStatus, AtomicBoolean sendThreadStatus) {
+    public SendThread(Consumer<String> cleaner, InternalQueue queue, BufferedWriter bufferedWriter, AtomicBoolean authenticationStatus, AtomicBoolean sendThreadStatus) {
         this.cleaner = cleaner;
         this.queue = queue;
         this.bufferedWriter = bufferedWriter;

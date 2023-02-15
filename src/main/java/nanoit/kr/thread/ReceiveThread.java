@@ -1,7 +1,7 @@
 package nanoit.kr.thread;
 
 import lombok.extern.slf4j.Slf4j;
-import nanoit.kr.TemporaryQueue;
+import nanoit.kr.InternalQueue;
 import nanoit.kr.domain.internaldata.InternalDataMapper;
 
 import java.io.BufferedReader;
@@ -11,11 +11,11 @@ import java.util.function.Consumer;
 @Slf4j
 public class ReceiveThread implements Runnable {
     private final Consumer<String> cleaner;
-    private final TemporaryQueue queue;
+    private final InternalQueue queue;
     private final BufferedReader bufferedReader;
     private final AtomicBoolean readThreadStatus;
 
-    public ReceiveThread(Consumer<String> cleaner, TemporaryQueue queue, BufferedReader bufferedReader, AtomicBoolean readThreadStatus) {
+    public ReceiveThread(Consumer<String> cleaner, InternalQueue queue, BufferedReader bufferedReader, AtomicBoolean readThreadStatus) {
         this.cleaner = cleaner;
         this.queue = queue;
         this.bufferedReader = bufferedReader;

@@ -1,5 +1,6 @@
 package nanoit.kr.db;
 
+import nanoit.kr.domain.PropertyDto;
 import org.apache.ibatis.builder.xml.XMLMapperBuilder;
 import org.apache.ibatis.datasource.pooled.PooledDataSource;
 import org.apache.ibatis.io.Resources;
@@ -18,13 +19,13 @@ import java.util.Properties;
 public class DataBaseSessionManager {
     private final SqlSessionFactory sqlSessionFactory;
 
-    public DataBaseSessionManager(Properties properties) throws IOException {
+    public DataBaseSessionManager(PropertyDto dto) throws IOException {
 
         PooledDataSource pooledDataSource = new PooledDataSource();
-        pooledDataSource.setDriver(properties.getProperty("driver"));
-        pooledDataSource.setUrl(properties.getProperty("url"));
-        pooledDataSource.setUsername(properties.getProperty("username"));
-        pooledDataSource.setPassword(properties.getProperty("password"));
+        pooledDataSource.setDriver(dto.getDbDriver());
+        pooledDataSource.setUrl(dto.getUrl());
+        pooledDataSource.setUsername(dto.getDbUsername());
+        pooledDataSource.setPassword(dto.getDbPwd());
         pooledDataSource.setPoolMaximumActiveConnections(5);
         pooledDataSource.setPoolMaximumIdleConnections(5);
         pooledDataSource.setPoolMaximumLocalBadConnectionTolerance(11);
@@ -39,22 +40,12 @@ public class DataBaseSessionManager {
         Configuration configuration = new Configuration(environment);
         configuration.setJdbcTypeForNull(JdbcType.VARCHAR);
         configuration.setCallSettersOnNulls(true);
-
         // Camel case -> snake Case 자동 매핑
         configuration.setMapUnderscoreToCamelCase(true);
 
-        String[] mapperResources;
-        if (properties.getProperty("mapper").contains(",")) {
-            mapperResources = properties.getProperty("mapper").split(",");
-        } else {
-            mapperResources = new String[]{properties.getProperty("mapper")};
-        }
-        for (String mapper : mapperResources) {
-            InputStream inputStream = Resources.getResourceAsStream(mapper);
-            XMLMapperBuilder mapperBuilder = new XMLMapperBuilder(inputStream, configuration, mapper, configuration.getSqlFragments());
-            mapperBuilder.parse();
-        }
-
+        InputStream inputStream = Resources.getResourceAsStream(dto.getMapper());
+        XMLMapperBuilder mapperBuilder = new XMLMapperBuilder(inputStream, configuration, dto.getMapper(), configuration.getSqlFragments());
+        mapperBuilder.parse();
         sqlSessionFactory = new SqlSessionFactoryBuilder().build(configuration);
     }
 

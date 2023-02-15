@@ -1,11 +1,6 @@
 package nanoit.kr.util;
 
-import nanoit.kr.repository.ReceiveMessageRepository;
-import nanoit.kr.repository.SendMessageRepository;
 import nanoit.kr.service.ReceiveMessageService;
-import nanoit.kr.service.ReceiveMessageServiceImpl;
-import nanoit.kr.service.SendMessageService;
-import nanoit.kr.service.SendMessageServiceImpl;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 

@@ -3,6 +3,7 @@ package nanoit.kr.module;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -12,61 +13,57 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class ModuleProcessManagerImpl {
 
-    private final Map<String, ModuleProcess> objectMap;
-    private final Map<String, Thread> threadMap;
-    private final ScheduledExecutorService scheduledExecutorService;
-    private final long DEAD_LINE = 3 * 60 * 1000L; // 1000 * 60 * 3 = 3분
+    private final Map<String, ModuleProcess> objectMap = new ConcurrentHashMap<>();
+    private final Map<String, Thread> threadMap = new ConcurrentHashMap<>();
+    private final ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
+    private static final long DEAD_LINE = 3 * 60 * 1000L; // 1000 * 60 * 3 = 3분
 
 
     public ModuleProcessManagerImpl() {
-        this.objectMap = new HashMap<>();
-        this.threadMap = new ConcurrentHashMap<>();
-        this.scheduledExecutorService = Executors.newScheduledThreadPool(1);
         scheduledExecutorService.scheduleAtFixedRate(this::monitor, 1000, 1000, TimeUnit.MILLISECONDS);
         monitor();
     }
 
 
     private void monitor() {
-        for (Map.Entry<String, ModuleProcess> entry : objectMap.entrySet()) {
-            if (objectMap.containsKey(entry.getKey()) && !threadMap.containsKey(entry.getKey()) && entry.getValue().status == ModuleProcess.Status.INIT) {
-                Thread thread = new Thread(objectMap.get(entry.getKey()));
-                thread.setName(entry.getKey());
+        for (String key : objectMap.keySet()) {
+            ModuleProcess process = objectMap.get(key);
+            if (!threadMap.containsKey(key) && process.status == ModuleProcess.Status.INIT) {
+                Thread thread = new Thread(process, key);
                 thread.start();
-                entry.getValue().status = ModuleProcess.Status.RUN;
-                threadMap.put(entry.getKey(), thread);
-                System.out.println("등록완료");
+                process.status = ModuleProcess.Status.RUN;
+                threadMap.put(key, thread);
             }
         }
 
-        for (Map.Entry<String, Thread> threadEntry : threadMap.entrySet()) {
-            if (!objectMap.containsKey(threadEntry.getKey()) && threadMap.containsKey(threadEntry)) {
-                if (interruptThread(threadEntry.getKey())) {
-                    threadMap.remove(threadEntry.getKey());
-                    System.out.println("삭제완료 ");
+        // hreadMap을 반복하는 동안 반복자(iterator)를 사용하도록 변경
+        // 이렇게 하면 threadMap을 동시에 수정하는 상황이 발생하지 않음
+
+        Iterator<Map.Entry<String, Thread>> iterator = threadMap.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<String, Thread> entry = iterator.next();
+            String key = entry.getKey();
+            Thread thread = entry.getValue();
+            ModuleProcess process = objectMap.get(key);
+
+            if (process == null) {
+                if (interruptThread(key)) {
+                    iterator.remove();
                 }
-            }
-            if (threadEntry.getValue().getState().equals(Thread.State.TERMINATED) && objectMap.containsKey(threadEntry.getKey())) {
-                String terminatedThreadUuid = threadEntry.getKey();
-                threadMap.remove(threadEntry.getKey(), threadEntry.getValue());
-
-                Thread restorationThread = new Thread(objectMap.get(terminatedThreadUuid));
-                restorationThread.setName(terminatedThreadUuid);
-                restorationThread.start();
-                threadMap.put(terminatedThreadUuid, restorationThread);
-
-            } else if (threadEntry.getValue().getState().equals(Thread.State.BLOCKED)) {
-                // 블락된 경우
-                // 교착상태에 빠지면 자원을 선점하고 있기에 스레드는 blocking 상테
-
-                long eachThreadDeadLine = calculateDeadLine(threadEntry.getKey());
-                if (isSetCurrentTime(threadEntry.getKey()) && isOverDeadLine(threadEntry.getKey(), eachThreadDeadLine)) {
-                    // 실행시간 기록된 Thread 일 경우  - 각 스레드의 실행시간이 DeadLine 을 넘겼는지 계산된 값을 isOverDeadLine 에 넣었을때 true 일 경우
-
-                    // Thread 의 종료  및 재실행?
-                    threadEntry.getValue().interrupt();
-                    if (!threadEntry.getValue().getState().equals(Thread.State.TERMINATED)) {
-                        objectMap.get(threadEntry.getKey()).shoutDown();
+            } else {
+                Thread.State state = thread.getState();
+                if (state == Thread.State.TERMINATED) {
+                    iterator.remove();
+                    Thread newThread = new Thread(process, key);
+                    newThread.start();
+                    threadMap.put(key, newThread);
+                } else if (state == Thread.State.BLOCKED) {
+                    long deadLine = calculateDeadLine(key);
+                    if (isSetCurrentTime(key) && isOverDeadLine(key, deadLine)) {
+                        thread.interrupt();
+                        if (thread.getState() != Thread.State.TERMINATED) {
+                            process.shoutDown();
+                        }
                     }
                 }
             }
@@ -87,21 +84,13 @@ public class ModuleProcessManagerImpl {
         if (modules == null) {
             return;
         }
-
         for (ModuleProcess moduleProcess : modules) {
-            if (moduleProcess.getUuid() == null) {
-                return;
-            }
-            if (objectMap.containsKey(moduleProcess.getUuid())) {
+            if (moduleProcess.getUuid() == null || objectMap.containsKey(moduleProcess.getUuid())) {
                 return;
             }
         }
-
         for (ModuleProcess moduleProcess : modules) {
             objectMap.put(moduleProcess.getUuid(), moduleProcess);
-        }
-
-        for (ModuleProcess moduleProcess : modules) {
             Thread thread = new Thread(moduleProcess);
             threadMap.put(moduleProcess.getUuid(), thread);
             thread.start();
@@ -109,15 +98,11 @@ public class ModuleProcessManagerImpl {
     }
 
     public boolean unregister(String uuid) {
-        if (uuid == null) {
-            return false;
-        }
-        if (!objectMap.containsKey(uuid)) {
+        if (uuid == null || !objectMap.containsKey(uuid)) {
             return false;
         }
         objectMap.remove(uuid);
         if (!interruptThread(uuid)) {
-            System.out.println("통과3");
             return false;
         }
         interruptThread(uuid);
@@ -151,11 +136,14 @@ public class ModuleProcessManagerImpl {
     }
 
     public long calculateDeadLine(String key) {
-        System.out.println("DeadLine 계산 -> " + DEAD_LINE + (objectMap.get(key).lastRunningTime * 1000L));
         return DEAD_LINE + (getCurrentTime(key) * 1000L);
     }
 
     private boolean isSetCurrentTime(String key) {
         return objectMap.get(key).lastRunningTime > 0;
+    }
+
+    public boolean isSuccessToStart() {
+        return runningThreadCount() == 2 && objectMap.size() == 2 && threadMap.size() == 2;
     }
 }

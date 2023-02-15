@@ -1,6 +1,6 @@
 package nanoit.kr.module;
 
-import nanoit.kr.TemporaryQueue;
+import nanoit.kr.InternalQueue;
 
 public abstract class ModuleProcess implements Runnable {
 
@@ -11,7 +11,7 @@ public abstract class ModuleProcess implements Runnable {
     }
 
     protected final String uuid;
-    protected final TemporaryQueue queue;
+    protected final InternalQueue queue;
     protected boolean flag;
 
     abstract public void shoutDown();
@@ -23,7 +23,7 @@ public abstract class ModuleProcess implements Runnable {
     protected Status status;
     protected final long lastRunningTime;
 
-    public ModuleProcess(TemporaryQueue queue, String uuid) {
+    public ModuleProcess(InternalQueue queue, String uuid) {
         this.queue = queue;
         this.uuid = uuid;
         moduleProcessManagerImpl.register(this);

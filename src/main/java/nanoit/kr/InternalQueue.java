@@ -7,12 +7,12 @@ import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-public class TemporaryQueue {
+public class InternalQueue {
 
     private final Map<InternalDataType, LinkedBlockingQueue<Object>> brokerQueue;
 
 
-    public TemporaryQueue() {
+    public InternalQueue() {
         this.brokerQueue = new HashMap<>();
 
         for (InternalDataType type : InternalDataType.values()) {

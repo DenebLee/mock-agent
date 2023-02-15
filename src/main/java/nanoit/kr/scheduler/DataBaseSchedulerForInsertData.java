@@ -2,7 +2,6 @@ package nanoit.kr.scheduler;
 
 import lombok.extern.slf4j.Slf4j;
 import nanoit.kr.domain.before.SendEntityBefore;
-import nanoit.kr.service.SendMessageService;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -14,10 +13,8 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class DataBaseSchedulerForInsertData {
     private final ScheduledExecutorService scheduledExecutorService;
-    private final SendMessageService sendMessageService;
 
-    public DataBaseSchedulerForInsertData(SendMessageService sendMessageService) {
-        this.sendMessageService = sendMessageService;
+    public DataBaseSchedulerForInsertData() {
         this.scheduledExecutorService = Executors.newScheduledThreadPool(1);
         scheduledExecutorService.scheduleAtFixedRate(task, 5, 10, TimeUnit.SECONDS);
     }
@@ -42,9 +39,6 @@ public class DataBaseSchedulerForInsertData {
                             .setLastModifiedAt(new Timestamp(System.currentTimeMillis()));
                     list.add(sendEntityBefore);
                 } while (count < limit);
-                if (sendMessageService.insertAll(list)) {
-                    log.info("[SCHEDULER-INSERT-DATA] INSERT SUCCESS  total count : [{}]", list.size());
-                }
             } catch (Exception e) {
                 e.printStackTrace();
                 scheduledExecutorService.shutdown();
