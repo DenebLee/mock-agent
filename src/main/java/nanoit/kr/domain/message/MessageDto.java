@@ -14,19 +14,26 @@ import java.sql.Timestamp;
 public class MessageDto {
 
     private long id;
+    private int agentId;
+
+
     private String selected;
-    private String phoneNumber;
     private String sendResult;
+    private String receiveResult;
+
+
+    private String phoneNumber;
     private String callbackNumber;
     private String senderName;
     private String content;
+
+
     private Timestamp sendTime;
-    private String receiveResult;
     private Timestamp receiveTime;
     private Timestamp createdAt;
     private Timestamp lastModifiedAt;
 
     private MessageEntity toEntity() {
-        return new MessageEntity(id, selected, phoneNumber, sendResult, callbackNumber, senderName, content, sendTime, receiveResult, receiveTime, createdAt, lastModifiedAt);
+        return new MessageEntity(id, agentId, selected, sendResult, receiveResult, phoneNumber, callbackNumber, senderName, content, sendTime, receiveTime, createdAt, lastModifiedAt);
     }
 }

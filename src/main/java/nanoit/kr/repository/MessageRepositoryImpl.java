@@ -1,7 +1,6 @@
 package nanoit.kr.repository;
 
 import nanoit.kr.db.DataBaseSessionManager;
-import nanoit.kr.domain.PropertyDto;
 import nanoit.kr.domain.before.SendAckEntityBefore;
 import nanoit.kr.domain.entity.MessageEntity;
 import nanoit.kr.exception.DeleteFailedException;
@@ -12,49 +11,26 @@ import org.apache.ibatis.session.SqlSession;
 
 import java.io.IOException;
 import java.util.List;
-
-/*
-    1. agent_table 생성
-    2. message select 여부에 대한 테이블 생성
-    3. message 전송과 응답에 대한 테이블 생성
-    4. 외래키 세팅
-    5. 외래키를 담당하는 테이블에 초기값 insert
- */
+import java.util.Properties;
 
 public class MessageRepositoryImpl implements MessageRepository {
 
+    private final DataBaseSessionManager sessionManager;
     private final SqlSession session;
 
-    public MessageRepositoryImpl(SqlSession session)  {
-        settingPreferences();
-        this.session = session;
+    public MessageRepositoryImpl(Properties prop) throws IOException {
+        this.sessionManager = new DataBaseSessionManager(prop);
+        this.session = sessionManager.getSqlSession(true);
+        createTable();
     }
 
     @Override
-    public void settingPreferences() {
+    public void createTable() {
         try {
             session.update("createTable");
-            session.update("createdMessage_selected");
-            session.update("createMessageResultTable");
-            session.update("foreignKeySet");
-            session.insert("insertResult");
-            session.insert("message_selected_insert");
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    @Override
-    public boolean insertAgentId(long agentId) {
-        try {
-            int a = session.insert("agent_id_insert", agentId);
-            if (a > 0) {
-                return true;
-            }
-        } catch (Exception e) {
-            throw new InsertFailedException("Failed to Insert Agent Id => " + e.getMessage());
-        }
-        return false;
     }
 
     @Override
@@ -91,7 +67,7 @@ public class MessageRepositoryImpl implements MessageRepository {
     @Override
     public boolean commonDeleteById(long id) {
         try {
-            int a = session.delete("deleteByid", id);
+            int a = session.delete("deleteById", id);
             if (a > 0) {
                 return true;
             }
@@ -184,6 +160,15 @@ public class MessageRepositoryImpl implements MessageRepository {
     public List<MessageEntity> sendSelectAll() {
         try {
             return session.selectList("send_selectAll");
+        } catch (Exception e) {
+            throw new SelectFailedException("Failed to Select All Message => " + e.getMessage());
+        }
+    }
+
+    @Override
+    public List<MessageEntity> selectAllWithUpdate() {
+        try {
+            return session.selectList("selectAllAndSetSelected");
         } catch (Exception e) {
             throw new SelectFailedException("Failed to Select All Message => " + e.getMessage());
         }

@@ -1,12 +1,11 @@
 package nanoit.kr.repository;
 
-import nanoit.kr.domain.PropertyDto;
 import nanoit.kr.domain.entity.MessageEntity;
 import nanoit.kr.domain.before.SendAckEntityBefore;
-import org.apache.ibatis.session.SqlSession;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Properties;
 
 /*
     count -  사용 가능한 엔티티 수를 반환 ✔
@@ -23,15 +22,11 @@ import java.util.List;
  */
 
 public interface MessageRepository {
-    static MessageRepository createMessageRepository(SqlSession session) throws IOException {
-        return new MessageRepositoryImpl(session) {
+    static MessageRepository createMessageRepository(Properties prop) throws IOException {
+        return new MessageRepositoryImpl(prop) {
         };
     }
-
-    void settingPreferences();
-
-    boolean insertAgentId(long agentId);
-
+    void createTable();
 
     // Common Method
     long commonCount();
@@ -61,6 +56,8 @@ public interface MessageRepository {
 
     // Send Method
     List<MessageEntity> sendSelectAll();
+
+    List<MessageEntity> selectAllWithUpdate();
 
     boolean selectedUpdate(List<MessageEntity> list);
 

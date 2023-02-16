@@ -1,6 +1,5 @@
 package nanoit.kr.db;
 
-import nanoit.kr.domain.PropertyDto;
 import org.apache.ibatis.builder.xml.XMLMapperBuilder;
 import org.apache.ibatis.datasource.pooled.PooledDataSource;
 import org.apache.ibatis.io.Resources;
@@ -19,13 +18,12 @@ import java.util.Properties;
 public class DataBaseSessionManager {
     private final SqlSessionFactory sqlSessionFactory;
 
-    public DataBaseSessionManager(PropertyDto dto) throws IOException {
-
+    public DataBaseSessionManager(Properties prop) throws IOException {
         PooledDataSource pooledDataSource = new PooledDataSource();
-        pooledDataSource.setDriver(dto.getDbDriver());
-        pooledDataSource.setUrl(dto.getUrl());
-        pooledDataSource.setUsername(dto.getDbUsername());
-        pooledDataSource.setPassword(dto.getDbPwd());
+        pooledDataSource.setDriver(prop.getProperty("driver"));
+        pooledDataSource.setUrl(prop.getProperty("url"));
+        pooledDataSource.setUsername(prop.getProperty("username"));
+        pooledDataSource.setPassword(prop.getProperty("password"));
         pooledDataSource.setPoolMaximumActiveConnections(5);
         pooledDataSource.setPoolMaximumIdleConnections(5);
         pooledDataSource.setPoolMaximumLocalBadConnectionTolerance(11);
@@ -40,13 +38,16 @@ public class DataBaseSessionManager {
         Configuration configuration = new Configuration(environment);
         configuration.setJdbcTypeForNull(JdbcType.VARCHAR);
         configuration.setCallSettersOnNulls(true);
+
         // Camel case -> snake Case 자동 매핑
         configuration.setMapUnderscoreToCamelCase(true);
 
-        InputStream inputStream = Resources.getResourceAsStream(dto.getMapper());
-        XMLMapperBuilder mapperBuilder = new XMLMapperBuilder(inputStream, configuration, dto.getMapper(), configuration.getSqlFragments());
+        InputStream inputStream = Resources.getResourceAsStream(prop.getProperty("mapper"));
+        XMLMapperBuilder mapperBuilder = new XMLMapperBuilder(inputStream, configuration, prop.getProperty("mapper"), configuration.getSqlFragments());
         mapperBuilder.parse();
+
         sqlSessionFactory = new SqlSessionFactoryBuilder().build(configuration);
+
     }
 
     public SqlSession getSqlSession(boolean autoCommit) {

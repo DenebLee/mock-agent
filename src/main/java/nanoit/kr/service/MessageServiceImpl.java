@@ -1,8 +1,6 @@
 package nanoit.kr.service;
 
-import com.sun.org.apache.bcel.internal.generic.ARETURN;
 import lombok.extern.slf4j.Slf4j;
-import nanoit.kr.domain.PropertyDto;
 import nanoit.kr.domain.entity.MessageEntity;
 import nanoit.kr.domain.message.Send;
 import nanoit.kr.exception.SelectFailedException;
@@ -14,7 +12,6 @@ import java.util.List;
 
 @Slf4j
 public class MessageServiceImpl implements MessageService {
-
     private final MessageRepository messageRepository;
 
     public MessageServiceImpl(MessageRepository messageRepository) {
@@ -28,7 +25,7 @@ public class MessageServiceImpl implements MessageService {
             return messageRepository.commonPing();
         } catch (SelectFailedException e) {
             log.error(e.getReason());
-            messageRepository.settingPreferences();
+            messageRepository.createTable();
         }
         return false;
     }
@@ -44,7 +41,7 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public List<Send> selectAll() throws InterruptedException {
+    public List<Send> selectAll()  {
         List<MessageEntity> messageEntities = new ArrayList<>();
         List<Send> sendList = new ArrayList<>();
         try {

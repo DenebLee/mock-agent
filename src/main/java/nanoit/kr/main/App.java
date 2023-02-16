@@ -1,7 +1,9 @@
 package nanoit.kr.main;
 
 import lombok.extern.slf4j.Slf4j;
-import nanoit.kr.manager.SessionManager;
+import nanoit.kr.InternalQueue;
+import nanoit.kr.module.Filter;
+import nanoit.kr.module.Mapper;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -23,10 +25,12 @@ public class App {
                 log.error("[SYSTEM] Property file does not exist in config file");
                 System.exit(-1);
             }
+//            DatabaseHandler databaseHandler = new DatabaseHandler();
 
-            SessionManager sessionManager = new SessionManager();
-            sessionManager.start();
-
+            InternalQueue internalQueue = new InternalQueue();
+            new Mapper(getRandomUuid(), internalQueue);
+            new Filter(getRandomUuid(), internalQueue);
+//            new Insert(getRandomUuid(), internalQueue);
         } catch (Exception e) {
             e.printStackTrace();
         }

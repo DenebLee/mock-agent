@@ -21,7 +21,7 @@ public class ConfigSetting {
         this.properties = new Properties();
     }
 
-    public List<PropertyDto> setting() {
+    public void setting() {
         try {
             File[] configureFiles = new File(System.getProperty("user.dir") + "/config").listFiles();
 
@@ -53,6 +53,9 @@ public class ConfigSetting {
         } catch (Exception e) {
             log.error("[CONFIG-SETTING] ERROR DETECTED : {}", e.getMessage());
         }
+    }
+
+    public List<PropertyDto> getList() {
         return list;
     }
 }
