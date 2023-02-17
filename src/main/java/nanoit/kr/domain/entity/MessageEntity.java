@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import nanoit.kr.domain.message.MessageDto;
+import nanoit.kr.domain.message.Send;
 
 import java.sql.Timestamp;
 
@@ -34,7 +35,10 @@ public class MessageEntity {
     private Timestamp lastModifiedAt;
 
     private MessageDto toDto() {
-        return new MessageDto(id, agentId,selected, receiveResult, sendResult, phoneNumber, callbackNumber, senderName, content, sendTime, receiveTime, createdAt, lastModifiedAt);
+        return new MessageDto(id, agentId, selected, receiveResult, sendResult, phoneNumber, callbackNumber, senderName, content, sendTime, receiveTime, createdAt, lastModifiedAt);
     }
 
+    private Send toSend() {
+        return new Send(id, phoneNumber, callbackNumber, senderName, content);
+    }
 }

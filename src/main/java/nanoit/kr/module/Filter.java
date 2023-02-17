@@ -8,7 +8,6 @@ import nanoit.kr.domain.internaldata.InternalDataInsert;
 import nanoit.kr.domain.message.ErrorPayload;
 import nanoit.kr.domain.message.Payload;
 import nanoit.kr.domain.message.Report;
-import nanoit.kr.domain.before.SendAckBefore;
 import nanoit.kr.extension.Jackson;
 
 @Slf4j
@@ -38,14 +37,7 @@ public class Filter extends ModuleProcess {
                     }
 
                     switch (payload.getType()) {
-                        case SEND_ACK:
-                            SendAckBefore sendAckBefore = Jackson.getInstance().getObjectMapper().convertValue(payload.getData(), SendAckBefore.class);
-                            if (queue.publish(new InternalDataInsert(sendAckBefore))) {
-                                log.debug("[FILTER] SEND_ACK SEND TO INSERT SUCCESS data :[{}]", sendAckBefore);
-                            } else {
-                                log.warn("[MAPPER] SEND_ACK SEND TO INSERT FAILED");
-                            }
-                            break;
+
 
                         case AUTHENTICATION_ACK:
                             log.info("[FILTER] AUTHENTICATION SUCCESS !! ");

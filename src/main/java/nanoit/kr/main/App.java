@@ -25,7 +25,7 @@ public class App {
                 log.error("[SYSTEM] Property file does not exist in config file");
                 System.exit(-1);
             }
-//            DatabaseHandler databaseHandler = new DatabaseHandler();
+
 
             InternalQueue internalQueue = new InternalQueue();
             new Mapper(getRandomUuid(), internalQueue);

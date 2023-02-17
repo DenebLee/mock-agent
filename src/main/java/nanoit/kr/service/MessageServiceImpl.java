@@ -2,6 +2,7 @@ package nanoit.kr.service;
 
 import lombok.extern.slf4j.Slf4j;
 import nanoit.kr.domain.entity.MessageEntity;
+import nanoit.kr.domain.entity.SendAckEntity;
 import nanoit.kr.domain.message.Send;
 import nanoit.kr.exception.SelectFailedException;
 import nanoit.kr.exception.UpdateFailedException;
@@ -41,7 +42,7 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public List<Send> selectAll()  {
+    public List<Send> selectAll() {
         List<MessageEntity> messageEntities = new ArrayList<>();
         List<Send> sendList = new ArrayList<>();
         try {
@@ -55,7 +56,7 @@ public class MessageServiceImpl implements MessageService {
             for (MessageEntity message : messageEntities) {
                 Send send = new Send();
                 send
-                        .setId(message.getId())
+                        .setMessageId(message.getId())
                         .setSenderName(message.getSenderName())
                         .setCallbackNumber(message.getCallbackNumber())
                         .setPhoneNumber(message.getPhoneNumber())
@@ -89,9 +90,9 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public boolean updateReceiveResult(long id) {
+    public boolean updateReceiveResult(SendAckEntity sendAck) {
         try {
-            return messageRepository.receiveUpdate(id);
+            return messageRepository.receiveUpdate(sendAck);
         } catch (UpdateFailedException e) {
             log.error(e.getReason());
 

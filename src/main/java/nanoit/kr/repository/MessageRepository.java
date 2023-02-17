@@ -1,7 +1,7 @@
 package nanoit.kr.repository;
 
 import nanoit.kr.domain.entity.MessageEntity;
-import nanoit.kr.domain.before.SendAckEntityBefore;
+import nanoit.kr.domain.entity.SendAckEntity;
 
 import java.io.IOException;
 import java.util.List;
@@ -26,6 +26,7 @@ public interface MessageRepository {
         return new MessageRepositoryImpl(prop) {
         };
     }
+
     void createTable();
 
     // Common Method
@@ -47,11 +48,11 @@ public interface MessageRepository {
     // Receive Method
     long receiveCount();
 
-    SendAckEntityBefore receiveSelectById(long id);
+    SendAckEntity receiveSelectById(long id);
 
     List<MessageEntity> receiveSelectAll();
 
-    boolean receiveUpdate(long id);
+    boolean receiveUpdate(SendAckEntity sendAck);
 
 
     // Send Method

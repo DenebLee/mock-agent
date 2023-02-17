@@ -1,15 +1,15 @@
-package nanoit.kr.domain.message;
+package nanoit.kr.domain.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.Accessors;
+import nanoit.kr.domain.message.MessageResult;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 
-public class SendAck {
+public class SendAckEntity {
     private long messageId;
-    private MessageResult result;
+    private String result;
 }

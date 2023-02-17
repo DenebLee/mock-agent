@@ -10,7 +10,7 @@ import lombok.experimental.Accessors;
 @NoArgsConstructor
 @Accessors(chain = true)
 public class Send {
-    private long id;
+    private long messageId;
     private String phoneNumber;
     private String callbackNumber;
     private String senderName;

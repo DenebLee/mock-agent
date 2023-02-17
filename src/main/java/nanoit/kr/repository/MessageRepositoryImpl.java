@@ -1,8 +1,8 @@
 package nanoit.kr.repository;
 
 import nanoit.kr.db.DataBaseSessionManager;
-import nanoit.kr.domain.before.SendAckEntityBefore;
 import nanoit.kr.domain.entity.MessageEntity;
+import nanoit.kr.domain.entity.SendAckEntity;
 import nanoit.kr.exception.DeleteFailedException;
 import nanoit.kr.exception.InsertFailedException;
 import nanoit.kr.exception.SelectFailedException;
@@ -124,7 +124,7 @@ public class MessageRepositoryImpl implements MessageRepository {
     }
 
     @Override
-    public SendAckEntityBefore receiveSelectById(long id) {
+    public SendAckEntity receiveSelectById(long id) {
         try {
             return session.selectOne("receive_selectById", id);
         } catch (Exception e) {
@@ -141,10 +141,12 @@ public class MessageRepositoryImpl implements MessageRepository {
         }
     }
 
+
+
     @Override
-    public boolean receiveUpdate(long id) {
+    public boolean receiveUpdate(SendAckEntity sendAck) {
         try {
-            int a = session.update("receive_update", id);
+            int a = session.update("receive_update", sendAck);
             if (a > 0) {
                 return true;
             }
@@ -153,6 +155,7 @@ public class MessageRepositoryImpl implements MessageRepository {
         }
         return false;
     }
+
 
 
     // Send

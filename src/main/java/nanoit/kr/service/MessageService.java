@@ -1,5 +1,6 @@
 package nanoit.kr.service;
 
+import nanoit.kr.domain.entity.SendAckEntity;
 import nanoit.kr.domain.message.Send;
 
 import java.util.List;
@@ -20,5 +21,5 @@ public interface MessageService {
 
     boolean updateSendResult(long id);
 
-    boolean updateReceiveResult(long id);
+    boolean updateReceiveResult(SendAckEntity sendAck);
 }

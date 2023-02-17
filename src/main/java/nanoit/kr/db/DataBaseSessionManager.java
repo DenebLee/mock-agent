@@ -16,7 +16,7 @@ import java.io.InputStream;
 import java.util.Properties;
 
 public class DataBaseSessionManager {
-    private final SqlSessionFactory sqlSessionFactory;
+    public final SqlSessionFactory sqlSessionFactory;
 
     public DataBaseSessionManager(Properties prop) throws IOException {
         PooledDataSource pooledDataSource = new PooledDataSource();
@@ -38,19 +38,21 @@ public class DataBaseSessionManager {
         Configuration configuration = new Configuration(environment);
         configuration.setJdbcTypeForNull(JdbcType.VARCHAR);
         configuration.setCallSettersOnNulls(true);
-
-        // Camel case -> snake Case 자동 매핑
         configuration.setMapUnderscoreToCamelCase(true);
 
-        InputStream inputStream = Resources.getResourceAsStream(prop.getProperty("mapper"));
-        XMLMapperBuilder mapperBuilder = new XMLMapperBuilder(inputStream, configuration, prop.getProperty("mapper"), configuration.getSqlFragments());
-        mapperBuilder.parse();
+        String mapperLocation = prop.getProperty("mapper");
+        try (InputStream inputStream = Resources.getResourceAsStream(mapperLocation)) {
+            XMLMapperBuilder mapperBuilder = new XMLMapperBuilder(inputStream, configuration, mapperLocation, configuration.getSqlFragments());
+            mapperBuilder.parse();
+        }
 
         sqlSessionFactory = new SqlSessionFactoryBuilder().build(configuration);
-
     }
 
     public SqlSession getSqlSession(boolean autoCommit) {
         return sqlSessionFactory.openSession(autoCommit);
+    }
+
+    public void setSqlSessionFactory(SqlSessionFactory sqlSessionFactory) {
     }
 }
