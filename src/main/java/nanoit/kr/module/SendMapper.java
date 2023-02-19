@@ -11,11 +11,11 @@ import nanoit.kr.domain.message.Payload;
 import nanoit.kr.extension.Jackson;
 
 @Slf4j
-public class Mapper extends ModuleProcess {
+public class SendMapper extends ModuleProcess {
 
     private final InternalQueue queue;
 
-    public Mapper(String uuid, InternalQueue queue) {
+    public SendMapper(String uuid, InternalQueue queue) {
         super(queue, uuid);
         this.queue = queue;
     }

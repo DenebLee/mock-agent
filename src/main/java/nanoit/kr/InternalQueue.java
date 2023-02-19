@@ -14,7 +14,6 @@ public class InternalQueue {
 
     public InternalQueue() {
         this.brokerQueue = new HashMap<>();
-
         for (InternalDataType type : InternalDataType.values()) {
             brokerQueue.put(type, new LinkedBlockingQueue<>());
         }

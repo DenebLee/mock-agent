@@ -58,10 +58,9 @@ public interface MessageRepository {
     // Send Method
     List<MessageEntity> sendSelectAll();
 
-    List<MessageEntity> selectAllWithUpdate();
-
     boolean selectedUpdate(List<MessageEntity> list);
 
+    boolean sendResultUpdates(List<Long> ids);
     boolean sendResultUpdate(long id);
 
 }

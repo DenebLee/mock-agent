@@ -8,8 +8,9 @@ import nanoit.kr.exception.SelectFailedException;
 import nanoit.kr.exception.UpdateFailedException;
 import nanoit.kr.repository.MessageRepository;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class MessageServiceImpl implements MessageService {
@@ -43,40 +44,45 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public List<Send> selectAll() {
-        List<MessageEntity> messageEntities = new ArrayList<>();
-        List<Send> sendList = new ArrayList<>();
         try {
-            messageEntities = messageRepository.sendSelectAll();
+            List<MessageEntity> messageEntities = messageRepository.sendSelectAll();
             if (messageEntities.isEmpty()) {
-                throw new Exception();
+                throw new SelectFailedException("[MSG-SERVICE] No messages found");
             }
+
             if (!messageRepository.selectedUpdate(messageEntities)) {
-                throw new Exception();
+                throw new UpdateFailedException("[MSG-SERVICE] Error in updating messages");
             }
-            for (MessageEntity message : messageEntities) {
-                Send send = new Send();
-                send
-                        .setMessageId(message.getId())
-                        .setSenderName(message.getSenderName())
-                        .setCallbackNumber(message.getCallbackNumber())
-                        .setPhoneNumber(message.getPhoneNumber())
-                        .setContent(message.getContent());
-                sendList.add(send);
-            }
+
+            List<Send> sendList = messageEntities.stream()
+                    .map(message -> new Send()
+                            .setMessageId(message.getId())
+                            .setAgentId(message.getAgentId())
+                            .setSenderName(message.getSenderName())
+                            .setCallbackNumber(message.getCallbackNumber())
+                            .setPhoneNumber(message.getPhoneNumber())
+                            .setContent(message.getContent()))
+                    .collect(Collectors.toList());
+
             return sendList;
 
-        } catch (SelectFailedException e) {
-            log.error(e.getReason());
-        } catch (UpdateFailedException e) {
-            log.error(e.getReason());
-            messageEntities.clear();
-        } catch (Exception e) {
+        } catch (SelectFailedException | UpdateFailedException e) {
             log.error(e.getMessage());
-            messageEntities.clear();
-            sendList.clear();
+            return Collections.emptyList();
+        } catch (Exception e) {
+            log.error("[MSG-SERVICE] Error in selecting messages", e);
             return null;
         }
-        return null;
+    }
+
+    @Override
+    public boolean updateSendResults(List<Long> ids) {
+        try {
+            return messageRepository.sendResultUpdates(ids);
+        } catch (UpdateFailedException e) {
+            log.error(e.getReason());
+        }
+        return false;
     }
 
     @Override

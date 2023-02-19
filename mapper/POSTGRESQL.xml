@@ -124,30 +124,29 @@
         WHERE selected = '0';
     </select>
 
-
-    <select id="selectAllAndSetSelected" resultType="java.util.List">
-        SELECT id, phone_num, callback_num, sender_name, content
-        FROM agent_tb WHERE selected = '0'
-        <foreach item="item" collection="list" separator="OR">
-            UPDATE agent_tb SET selected = '1' WHERE id = #{item.id}
-        </foreach>
-    </select>
-
     <update id="send_select_update" parameterType="java.util.List">
         <foreach collection="list" item="item" separator=",">
             UPDATE agent_tb
             SET selected = '1',
             send_time = now(),
+            created_at = now(),
             last_modified_at = now()
             WHERE id = #{item.id};
         </foreach>
     </update>
 
-    <update id="send_result_update" parameterType="java.lang.Long">
+    <update id="send_result_updates" parameterType="java.util.List">
         UPDATE agent_tb
-        SET send_result = '1'
-        WHERE id = #{id};
+        <foreach collection="list" item ="item" separator=",">
+            SET send_result = '1'
+            WHERE id = #{item.id} AND selected = '1';
+        </foreach>
     </update>
 
+    <update id="send_result_update" parameterType="_long">
+        UPDATE agent_tb
+        SET send_result = '1'
+        WHERE id = #{item.id} AND selected = '1';
+    </update>
 </mapper>
 

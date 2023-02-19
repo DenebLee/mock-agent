@@ -113,7 +113,6 @@ public class MessageRepositoryImpl implements MessageRepository {
     }
 
 
-    // Receive
     @Override
     public long receiveCount() {
         try {
@@ -169,15 +168,6 @@ public class MessageRepositoryImpl implements MessageRepository {
     }
 
     @Override
-    public List<MessageEntity> selectAllWithUpdate() {
-        try {
-            return session.selectList("selectAllAndSetSelected");
-        } catch (Exception e) {
-            throw new SelectFailedException("Failed to Select All Message => " + e.getMessage());
-        }
-    }
-
-    @Override
     public boolean selectedUpdate(List<MessageEntity> list) {
         try {
             int a = session.update("send_select_update", list);
@@ -191,6 +181,19 @@ public class MessageRepositoryImpl implements MessageRepository {
     }
 
     @Override
+    public boolean sendResultUpdates(List<Long> ids) {
+        try {
+            int a = session.update("send_result_updates", ids);
+            if (a > 0) {
+                return true;
+            }
+        } catch (Exception e) {
+            throw new UpdateFailedException("Failed to Update Send Result => " + e.getMessage());
+        }
+        return false;
+    }
+
+    @Override
     public boolean sendResultUpdate(long id) {
         try {
             int a = session.update("send_result_update", id);
@@ -198,7 +201,7 @@ public class MessageRepositoryImpl implements MessageRepository {
                 return true;
             }
         } catch (Exception e) {
-            throw new UpdateFailedException("Failed to Update Send Result => " + e.getMessage());
+            throw new UpdateFailedException("Failed to update Send Result => " + e.getMessage());
         }
         return false;
     }

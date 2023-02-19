@@ -3,7 +3,7 @@ package nanoit.kr.main;
 import lombok.extern.slf4j.Slf4j;
 import nanoit.kr.InternalQueue;
 import nanoit.kr.module.Filter;
-import nanoit.kr.module.Mapper;
+import nanoit.kr.module.SendMapper;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -28,7 +28,7 @@ public class App {
 
 
             InternalQueue internalQueue = new InternalQueue();
-            new Mapper(getRandomUuid(), internalQueue);
+            new SendMapper(getRandomUuid(), internalQueue);
             new Filter(getRandomUuid(), internalQueue);
 //            new Insert(getRandomUuid(), internalQueue);
         } catch (Exception e) {
