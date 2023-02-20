@@ -54,17 +54,14 @@ public class MessageServiceImpl implements MessageService {
                 throw new UpdateFailedException("[MSG-SERVICE] Error in updating messages");
             }
 
-            List<Send> sendList = messageEntities.stream()
+            return messageEntities.stream()
                     .map(message -> new Send()
                             .setMessageId(message.getId())
-                            .setAgentId(message.getAgentId())
                             .setSenderName(message.getSenderName())
                             .setCallbackNumber(message.getCallbackNumber())
                             .setPhoneNumber(message.getPhoneNumber())
                             .setContent(message.getContent()))
                     .collect(Collectors.toList());
-
-            return sendList;
 
         } catch (SelectFailedException | UpdateFailedException e) {
             log.error(e.getMessage());

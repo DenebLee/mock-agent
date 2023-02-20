@@ -1,16 +1,16 @@
 package nanoit.kr.module;
 
 import lombok.extern.slf4j.Slf4j;
-import nanoit.kr.InternalQueue;
+import nanoit.kr.queue.InternalQueueImpl;
 import nanoit.kr.service.MessageService;
 
 @Slf4j
 public class Insert extends ModuleProcess {
 
-    private final InternalQueue queue;
+    private final InternalQueueImpl queue;
     private final MessageService messageService;
 
-    public Insert(String uuid, InternalQueue queue, MessageService messageService) {
+    public Insert(String uuid, InternalQueueImpl queue, MessageService messageService) {
         super(queue, uuid);
         this.queue = queue;
         this.messageService = messageService;

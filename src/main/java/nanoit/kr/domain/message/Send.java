@@ -12,7 +12,6 @@ import lombok.experimental.Accessors;
 
 public class Send {
     private long messageId;
-    private int agentId;
     private String phoneNumber;
     private String callbackNumber;
     private String senderName;

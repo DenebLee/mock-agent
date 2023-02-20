@@ -14,8 +14,6 @@ import java.sql.Timestamp;
 public class MessageDto {
 
     private long id;
-    private int agentId;
-
 
     private String selected;
     private String sendResult;
@@ -34,6 +32,6 @@ public class MessageDto {
     private Timestamp lastModifiedAt;
 
     private MessageEntity toEntity() {
-        return new MessageEntity(id, agentId, selected, sendResult, receiveResult, phoneNumber, callbackNumber, senderName, content, sendTime, receiveTime, createdAt, lastModifiedAt);
+        return new MessageEntity(id, selected, sendResult, receiveResult, phoneNumber, callbackNumber, senderName, content, sendTime, receiveTime, createdAt, lastModifiedAt);
     }
 }

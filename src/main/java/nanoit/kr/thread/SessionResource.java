@@ -2,7 +2,7 @@ package nanoit.kr.thread;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import nanoit.kr.InternalQueue;
+import nanoit.kr.queue.InternalQueueImpl;
 import nanoit.kr.db.DataBaseSessionManager;
 import nanoit.kr.module.ModuleProcessManagerImpl;
 import nanoit.kr.scheduler.DataBaseScheduler;
@@ -23,7 +23,7 @@ public class SessionResource {
     @Getter
     private SqlSession sqlSession;
     @Getter
-    private final InternalQueue queue;
+    private final InternalQueueImpl queue;
     @Getter
     private final ModuleProcessManagerImpl moduleProcessManager;
     @Getter
@@ -32,7 +32,7 @@ public class SessionResource {
     @Getter
     private final DataBaseSessionManager dataBaseSessionManager;
 
-    public SessionResource(MessageService messageService, SqlSession sqlSession, InternalQueue queue, ModuleProcessManagerImpl moduleProcessManager, DataBaseScheduler dataBaseScheduler, DataBaseSessionManager dataBaseSessionManager) {
+    public SessionResource(MessageService messageService, SqlSession sqlSession, InternalQueueImpl queue, ModuleProcessManagerImpl moduleProcessManager, DataBaseScheduler dataBaseScheduler, DataBaseSessionManager dataBaseSessionManager) {
         this.messageService = messageService;
         this.sqlSession = sqlSession;
         this.queue = queue;

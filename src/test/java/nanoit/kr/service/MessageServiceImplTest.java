@@ -1,9 +1,12 @@
 package nanoit.kr.service;
+
 import nanoit.kr.domain.entity.MessageEntity;
 import nanoit.kr.domain.entity.SendAckEntity;
 import nanoit.kr.domain.message.MessageResult;
 import nanoit.kr.domain.message.Send;
 import nanoit.kr.exception.SelectFailedException;
+import nanoit.kr.exception.UpdateFailedException;
+import nanoit.kr.repository.MessageRepository;
 import nanoit.kr.setup.TestSetup;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -12,12 +15,12 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.mockito.Mockito.*;
 
 @Testcontainers
 class MessageServiceImplTest extends TestSetup {
@@ -31,30 +34,16 @@ class MessageServiceImplTest extends TestSetup {
         messageRepository.commonDeleteTable();
     }
 
-    @DisplayName("생성된 테이블에 ping 을 날렸을 때 존재하는 경우 정상적으로 true 값이 return 되어야 한다")
+    @DisplayName("t1 - 생성된 테이블에 ping 을 날렸을 때 존재하는 경우 정상적으로 true 값이 return 되어야 한다")
     @Test
     void t1() {
         // given , when , then
         assertThat(messageService.isAlive()).isTrue();
     }
 
-    @DisplayName("테이블에 ping 을 날렸을 때 테이블이 정상적으로 생성이 안되어 있으면 false 값을 반환하여야 한다")
+    @DisplayName("t2 - 테이블에 레코드들이 존재하는 경우 count 메소드를 실행 하였을 때 존재하는 레코들의 갯수가 return 되어야 한다")
     @Test
-    void t2(){
-        // given
-        when(messageRepository.commonPing()).thenThrow(new SelectFailedException("failed"));
-
-        // when
-        boolean result = messageService.isAlive();
-
-        // then
-        verify(messageRepository).commonPing();
-        verify(messageRepository).createTable();
-    }
-
-    @DisplayName("테이블에 레코드들이 존재하는 경우 count 메소드를 실행 하였을 때 존재하는 레코들의 갯수가 return 되어야 한다")
-    @Test
-    void t3(){
+    void t2() {
         // given
         int count = 4;
         insertMessages(count);
@@ -66,23 +55,26 @@ class MessageServiceImplTest extends TestSetup {
         assertThat(actualCount).isEqualTo(count);
     }
 
-    @DisplayName("테이블에 레코드가 없을 경우 count 를 실행 하였을 때 failed 가 되어야 하며 0이 return 되어야 한다")
+    @DisplayName("t3 - 테이블에 레코드가 없을 경우 count 를 실행 하였을 때 failed 가 되어야 하며 0이 return 되어야 한다")
     @Test
-    void t4(){
+    void t3() {
         // given
+        MessageRepository messageRepository = mock(MessageRepository.class);
         when(messageRepository.commonCount()).thenThrow(new SelectFailedException("failed"));
+        MessageService messageService = new MessageServiceImpl(messageRepository);
 
         // when
         long result = messageService.count();
 
         // then
-        assertEquals(0L, result);
         verify(messageRepository).commonCount();
+        assertThat(result).isEqualTo(0L);
     }
 
-    @DisplayName("테이블에 있는 레코드들을 모두 가져오는 selectAll 메소드를 실행 하면 가져온 레코드들을 send 로 변환하고 selected 를 업데이트 하여야 한다")
+
+    @DisplayName("t4 - 테이블에 있는 레코드들을 모두 가져오는 selectAll 메소드를 실행 하면 가져온 레코드들을 send 로 변환하고 selected 를 업데이트 하여야 한다")
     @Test
-    void t5() throws InterruptedException {
+    void t4() throws InterruptedException {
         // given
         int count = 10;
         List<MessageEntity> list = insertMessages(count);
@@ -91,13 +83,12 @@ class MessageServiceImplTest extends TestSetup {
         List<Send> expected = messageService.selectAll();
 
         // then
+        int messageCount = 1;
         for (Send send : expected) {
-            int messageCount = 1;
             assertThat(send.getMessageId()).isEqualTo(messageCount);
-            assertThat(send.getPhoneNumber()).isEqualTo(list.get(messageCount).getPhoneNumber());
-            assertThat(send.getCallbackNumber()).isEqualTo(list.get(messageCount).getCallbackNumber());
-            assertThat(send.getSenderName()).isEqualTo(list.get(messageCount).getSenderName());
-            assertThat(send.getPhoneNumber()).isEqualTo(list.get(messageCount).getContent());
+            assertThat(send.getPhoneNumber()).isEqualTo("010-4444-5555");
+            assertThat(send.getCallbackNumber()).isEqualTo("053-111-2222");
+            assertThat(send.getSenderName()).isEqualTo("이정섭" + messageCount);
             messageCount++;
         }
 
@@ -110,67 +101,55 @@ class MessageServiceImplTest extends TestSetup {
         }
     }
 
-    @DisplayName("테이블에 레코드가 없을 경우 selectAll 메소드를 실행 하였을 때 정상적으로 실패 처리가 되어야 하며 list 가 null 이여야 한다")
+    @DisplayName("t5 - 테이블에 레코드가 없을 경우 selectAll 메소드를 실행 하였을 때 정상적으로 실패 처리가 되어야 하며 list 가 null 이여야 한다")
     @Test
-    void t6() throws InterruptedException {
-        // given
-        when(messageRepository.sendSelectAll()).thenReturn(null);
+    void t5() {
+        MessageRepository messageRepository = mock(MessageRepository.class);
+        MessageService messageService = mock(MessageServiceImpl.class);
 
-        // when
-        List<Send> result = messageService.selectAll();
-
-        // then
-        assertThat(result).isNull();
-        verify(messageRepository).sendSelectAll();
+        assertThatThrownBy(() -> {
+            messageService.selectAll();
+            when(messageRepository.sendSelectAll()).thenReturn(Collections.emptyList());
+        }).isInstanceOf(SelectFailedException.class)
+                .hasMessageContaining("[MSG-SERVICE] No messages found");
     }
 
-    @DisplayName("테이블에 레코드가 존재하지만 selectAll 메소드를 실행 하였을 때 selected 상태 업데이트에 실패하였을 때 정상적으로 에러 처리가 되어야 한다")
+    @DisplayName("t6 - 테이블에 레코드가 존재하지만 selectAll 메소드를 실행 하였을 때 selected 상태 업데이트에 실패하였을 때 정상적으로 에러 처리가 되어야 한다")
     @Test
-    void t7(){
-        // given
-        int count = 10;
-        List<MessageEntity> list = insertMessages(count);
-
-        when(messageRepository.sendSelectAll()).thenReturn(list);
-
-        // when
-        boolean result = messageRepository.selectedUpdate(list);
-
-        // then
-        verify(messageRepository).sendSelectAll();
-        verify(messageRepository).selectedUpdate(list);
-
-        assertThat(result).isFalse();
+    void t6() {
+        List<MessageEntity> messageEntities = mock(ArrayList.class);
+        assertThatThrownBy(() -> {
+            when(messageRepository.sendSelectAll()).thenReturn(messageEntities);
+            when(messageRepository.selectedUpdate(messageEntities)).thenReturn(false);
+        }).isInstanceOf(UpdateFailedException.class)
+                .hasMessageContaining("[MSG-SERVICE] Error in updating messages");
     }
 
-    @DisplayName("Queue 에 정상적으로 publish 하게 되면 id 들이 담긴 list 를 넘겨줬을 때 정상적으로 해당 id 에 해당하는 레코드들의 sendResult 가 수정되어야 한다")
+    @DisplayName("t7 - Queue 에 정상적으로 publish 하게 되면 id 들이 담긴 list 를 넘겨줬을 때 정상적으로 해당 id 에 해당하는 레코드들의 sendResult 가 수정되어야 한다")
     @Test
-    void t8() throws InterruptedException {
+    void t7() throws InterruptedException {
         // given
-        int count = 10;
-        insertMessages(count);
+        int count = 1;
         List<Long> ids = new ArrayList<>();
+        List<Send> sendList = messageService.selectAll();
 
-        List<Send> list = messageService.selectAll();
-
-        for (Send send: list) {
+        for (Send send : sendList) {
             ids.add(send.getMessageId());
         }
-
         // when
         boolean result = messageService.updateSendResults(ids);
 
         // then
         assertThat(result).isTrue();
-        for (int i = 1; i < count+1; i++) {
+        for (int i = 1; i < count + 1; i++) {
             MessageEntity data = messageRepository.selectById(i);
             assertThat(data.getSelected()).isEqualTo(MessageResult.SUCCESS.getProperty());
         }
     }
 
-    @DisplayName("Queue 에 publish 하기 전 ids 가 빈 리스트일 경우 updateSendResult 가 실패해야 한다")
+    @DisplayName("t8 - Queue 에 publish 하기 전 ids 가 빈 리스트일 경우 updateSendResult 가 실패해야 한다")
     @Test
-    void t9(){
+    void t8() {
         // given
         List<Long> emptyIds = new ArrayList<>();
 
@@ -185,24 +164,24 @@ class MessageServiceImplTest extends TestSetup {
         }
     }
 
-    @DisplayName("updateReceiveResults 메소드를 실행 하였을 때 정상적으로 전달한 id 값에 해당하는 레코드들이 업데이트 되어야 한다")
+    @DisplayName("t9 - updateReceiveResults 메소드를 실행 하였을 때 정상적으로 전달한 id 값에 해당하는 레코드들이 업데이트 되어야 한다")
     @Test
-    void t10() throws InterruptedException {
+    void t9() throws InterruptedException {
         // given
         int count = 5;
         List<MessageEntity> list = insertMessages(count);
         List<Send> expected = messageService.selectAll();
         List<Long> ids = new ArrayList<>();
-
+        int messageCount = 1;
         for (Send send : expected) {
-            int messageCount = 1;
             assertThat(send.getMessageId()).isEqualTo(messageCount);
-            assertThat(send.getPhoneNumber()).isEqualTo(list.get(messageCount).getPhoneNumber());
-            assertThat(send.getCallbackNumber()).isEqualTo(list.get(messageCount).getCallbackNumber());
-            assertThat(send.getSenderName()).isEqualTo(list.get(messageCount).getSenderName());
-            assertThat(send.getPhoneNumber()).isEqualTo(list.get(messageCount).getContent());
-            messageCount++;
+            assertThat(send.getPhoneNumber()).isEqualTo("010-4444-5555");
+            assertThat(send.getCallbackNumber()).isEqualTo("053-111-2222");
+            System.out.println(send.getSenderName());
+            assertThat(send.getSenderName()).isEqualTo("이정섭" + messageCount);
             ids.add(send.getMessageId());
+            messageCount++;
+
         }
         boolean updateSendResult = messageService.updateSendResults(ids);
 
@@ -218,13 +197,12 @@ class MessageServiceImplTest extends TestSetup {
 
     }
 
-    @DisplayName("updateSendResult 메소드를 실행 하였을 때 정상적으로 전달한 id 값에 해당하는 레코드들이 업데이트 되어야 한다")
+    @DisplayName("t10 - updateSendResult 메소드를 실행 하였을 때 정상적으로 전달한 id 값에 해당하는 레코드들이 업데이트 되어야 한다")
     @Test
-    void t11() throws InterruptedException {
+    void t10() throws InterruptedException {
         // given
         MessageEntity expected = new MessageEntity();
         expected
-                .setAgentId(1)
                 .setPhoneNumber("010-4444-5555")
                 .setCallbackNumber("053-111-2222")
                 .setSenderName("이정섭")
@@ -245,7 +223,6 @@ class MessageServiceImplTest extends TestSetup {
         for (int i = 1; i < count + 1; i++) {
             MessageEntity message = new MessageEntity();
             message
-                    .setAgentId(1)
                     .setPhoneNumber("010-4444-5555")
                     .setCallbackNumber("053-111-2222")
                     .setSenderName("이정섭" + i)

@@ -48,7 +48,7 @@ public interface MessageRepository {
     // Receive Method
     long receiveCount();
 
-    SendAckEntity receiveSelectById(long id);
+    MessageEntity receiveSelectById(long id);
 
     List<MessageEntity> receiveSelectAll();
 

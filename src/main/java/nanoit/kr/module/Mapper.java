@@ -2,16 +2,16 @@ package nanoit.kr.module;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
-import nanoit.kr.InternalQueue;
+import nanoit.kr.queue.InternalQueueImpl;
 import nanoit.kr.domain.message.Payload;
 import nanoit.kr.extension.Jackson;
 
 @Slf4j
-public class ReceiveMapper extends ModuleProcess {
+public class Mapper extends ModuleProcess {
 
-    private final InternalQueue queue;
+    private final InternalQueueImpl queue;
 
-    public ReceiveMapper(String uuid, InternalQueue queue) {
+    public Mapper(String uuid, InternalQueueImpl queue) {
         super(queue, uuid);
         this.queue = queue;
     }

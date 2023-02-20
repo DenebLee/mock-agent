@@ -1,7 +1,11 @@
 package nanoit.kr.scheduler;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
-import nanoit.kr.InternalQueue;
+import nanoit.kr.domain.message.Payload;
+import nanoit.kr.extension.Jackson;
+import nanoit.kr.queue.InternalDataType;
+import nanoit.kr.queue.InternalQueueImpl;
 import nanoit.kr.domain.message.Send;
 import nanoit.kr.service.MessageService;
 
@@ -15,10 +19,10 @@ import java.util.concurrent.TimeUnit;
 public class DataBaseScheduler {
     private final ScheduledExecutorService scheduledExecutorService;
     private final MessageService messageService;
-    private final InternalQueue queue;
+    private final InternalQueueImpl queue;
     private List<Send> selectList;
 
-    public DataBaseScheduler(MessageService messageService, InternalQueue queue)  {
+    public DataBaseScheduler(MessageService messageService, InternalQueueImpl queue) {
         this.messageService = messageService;
         this.queue = queue;
         this.selectList = new ArrayList<>();
@@ -32,7 +36,8 @@ public class DataBaseScheduler {
             try {
                 selectList = messageService.selectAll();
                 for (Send send : selectList) {
-                    if (queue.publish(send)) {
+                    String payload = converToString(send);
+                    if (queue.publish(InternalDataType.SENDER, send)) {
                         log.debug("[SCHEDULER] SELECT DATA FROM TABLE SUCCESS !!! number Imported : [{}]", selectList.size());
                     }
                 }
@@ -45,7 +50,7 @@ public class DataBaseScheduler {
     };
 
     public void start() {
-        scheduledExecutorService.scheduleWithFixedDelay(task, 1, 3, TimeUnit.MICROSECONDS);
+        scheduledExecutorService.scheduleWithFixedDelay(task, 1, 2, TimeUnit.MICROSECONDS);
     }
 
     public boolean isSchedulerShutdown() {
@@ -56,5 +61,7 @@ public class DataBaseScheduler {
         this.scheduledExecutorService.shutdownNow();
     }
 
-
+    private String converToString(Send send) throws JsonProcessingException {
+        return Jackson.getInstance().getObjectMapper().writeValueAsString(send);
+    }
 }

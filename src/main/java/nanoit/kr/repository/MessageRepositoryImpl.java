@@ -29,7 +29,7 @@ public class MessageRepositoryImpl implements MessageRepository {
         try {
             session.update("createTable");
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new UpdateFailedException("Failed to Create Table => " + e.getMessage());
         }
     }
 
@@ -123,7 +123,7 @@ public class MessageRepositoryImpl implements MessageRepository {
     }
 
     @Override
-    public SendAckEntity receiveSelectById(long id) {
+    public MessageEntity receiveSelectById(long id) {
         try {
             return session.selectOne("receive_selectById", id);
         } catch (Exception e) {
@@ -141,7 +141,6 @@ public class MessageRepositoryImpl implements MessageRepository {
     }
 
 
-
     @Override
     public boolean receiveUpdate(SendAckEntity sendAck) {
         try {
@@ -154,7 +153,6 @@ public class MessageRepositoryImpl implements MessageRepository {
         }
         return false;
     }
-
 
 
     // Send
