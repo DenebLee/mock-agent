@@ -61,6 +61,7 @@ public interface MessageRepository {
     boolean selectedUpdate(List<MessageEntity> list);
 
     boolean sendResultUpdates(List<Long> ids);
+
     boolean sendResultUpdate(long id);
 
 }

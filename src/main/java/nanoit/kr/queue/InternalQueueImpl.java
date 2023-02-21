@@ -31,5 +31,5 @@ public class InternalQueueImpl implements InternalQueue {
     public int getInternalQueueSize(InternalDataType type) {
         return internalDataQueue.get(type).size();
     }
-    
+
 }

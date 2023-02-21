@@ -26,7 +26,6 @@ public class ReceiveThread implements Runnable {
     public void run() {
         try {
             log.info("[RECEIVE] RECEIVE - THREAD START");
-            // 인증 메시지를 보낸다음 authentication 성공 여부에 따라 루프문 실행
             while (readThreadStatus.get()) {
                 String receiveData = bufferedReader.readLine();
                 if (receiveData != null) {

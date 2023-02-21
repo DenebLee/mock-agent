@@ -16,7 +16,6 @@ public class PropertyDto {
     private String dbDriver;
     private String dbUsername;
     private String dbPwd;
-    private String mapper;
     private String tcpUrl;
     private int port;
 

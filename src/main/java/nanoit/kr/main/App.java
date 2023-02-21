@@ -42,7 +42,7 @@ public class App {
         Path configDirPath = Paths.get(CONFIG_DIR_PATH);
         boolean isDirectoryExist = Files.isDirectory(configDirPath);
         boolean isPropertiesExist = Files.list(configDirPath)
-                .anyMatch(path -> path.toString().endsWith(".properties"));
+                .anyMatch(path -> path.toString().endsWith(".xml"));
 
         return isDirectoryExist && isPropertiesExist;
     }

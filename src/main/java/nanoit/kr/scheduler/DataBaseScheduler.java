@@ -1,12 +1,10 @@
 package nanoit.kr.scheduler;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
-import nanoit.kr.domain.message.Payload;
-import nanoit.kr.extension.Jackson;
+import nanoit.kr.domain.message.Send;
+import nanoit.kr.exception.SelectFailedException;
 import nanoit.kr.queue.InternalDataType;
 import nanoit.kr.queue.InternalQueueImpl;
-import nanoit.kr.domain.message.Send;
 import nanoit.kr.service.MessageService;
 
 import java.util.ArrayList;
@@ -20,48 +18,68 @@ public class DataBaseScheduler {
     private final ScheduledExecutorService scheduledExecutorService;
     private final MessageService messageService;
     private final InternalQueueImpl queue;
-    private List<Send> selectList;
 
     public DataBaseScheduler(MessageService messageService, InternalQueueImpl queue) {
         this.messageService = messageService;
         this.queue = queue;
-        this.selectList = new ArrayList<>();
         this.scheduledExecutorService = Executors.newScheduledThreadPool(1);
     }
 
-
-    public Runnable task = new Runnable() {
-        @Override
-        public void run() {
+    public void start() {
+        scheduledExecutorService.scheduleWithFixedDelay(() -> {
             try {
-                selectList = messageService.selectAll();
+                List<Send> selectList = messageService.selectAll();
                 for (Send send : selectList) {
-                    String payload = converToString(send);
-                    if (queue.publish(InternalDataType.SENDER, send)) {
-                        log.debug("[SCHEDULER] SELECT DATA FROM TABLE SUCCESS !!! number Imported : [{}]", selectList.size());
+                    if (send == null) {
+                        throw new SelectFailedException("[SCHEDULER] Data Select from DB Error");
+                    }
+                    if (!sendToMapperQueue(selectList)) {
+                        throw new RuntimeException();
                     }
                 }
             } catch (Exception e) {
-                e.printStackTrace();
-                shutdownScheduler();
-                log.error("[SCHEDULER] SHUTDOWN -> {}", e.getMessage());
+                log.error("[SCHEDULER] Exception occurred in the scheduler: {}", e.getMessage(), e);
+                shutdownRestartScheduler();
             }
-        }
-    };
-
-    public void start() {
-        scheduledExecutorService.scheduleWithFixedDelay(task, 1, 2, TimeUnit.MICROSECONDS);
+        }, 0, 2, TimeUnit.SECONDS);
     }
 
     public boolean isSchedulerShutdown() {
         return scheduledExecutorService.isShutdown();
     }
 
-    public void shutdownScheduler() {
-        this.scheduledExecutorService.shutdownNow();
+
+    public void shutdownRestartScheduler() {
+        scheduledExecutorService.shutdown();
+        try {
+            // awaitThermination
+            // ExecutorService가 종료될 때까지 대기
+            //  해당 메소드를 호출하여 모든 작어빙 완료되고 ExecutorService 가 종료될 때까지 기다릴 수있다
+
+            if (!scheduledExecutorService.awaitTermination(10, TimeUnit.SECONDS)) {
+                scheduledExecutorService.shutdownNow();
+                if (!scheduledExecutorService.awaitTermination(10, TimeUnit.SECONDS)) {
+                    log.error("[SCHEDULER] Failed to shutdown scheduler");
+                }
+            }
+            log.debug("[SCHEDULER] Scheduler is shutdown");
+        } catch (InterruptedException e) {
+            scheduledExecutorService.shutdownNow();
+            Thread.currentThread().interrupt();
+            log.error("[SCHEDULER] Shutdown of scheduler interrupted: {}", e.getMessage(), e);
+        } finally {
+            start();
+        }
     }
 
-    private String converToString(Send send) throws JsonProcessingException {
-        return Jackson.getInstance().getObjectMapper().writeValueAsString(send);
+    public boolean sendToMapperQueue(List<Send> sendList) {
+        if (sendList == null) {
+            return false;
+        }
+        if (queue.publish(InternalDataType.SENDER, sendList)) {
+            log.debug("[SCHEDULER] SELECT DATA FROM TABLE SUCCESS !!! number Imported : [{}]", sendList.size());
+            return true;
+        }
+        return false;
     }
 }

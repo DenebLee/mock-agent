@@ -1,22 +1,24 @@
+
 package nanoit.kr.db;
 
-import org.apache.ibatis.builder.xml.XMLMapperBuilder;
-import org.apache.ibatis.datasource.pooled.PooledDataSource;
-import org.apache.ibatis.io.Resources;
-import org.apache.ibatis.mapping.Environment;
-import org.apache.ibatis.session.Configuration;
-import org.apache.ibatis.session.SqlSession;
-import org.apache.ibatis.session.SqlSessionFactory;
-import org.apache.ibatis.session.SqlSessionFactoryBuilder;
-import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;
-import org.apache.ibatis.type.JdbcType;
+        import org.apache.ibatis.builder.xml.XMLMapperBuilder;
+        import org.apache.ibatis.datasource.pooled.PooledDataSource;
+        import org.apache.ibatis.io.Resources;
+        import org.apache.ibatis.mapping.Environment;
+        import org.apache.ibatis.session.Configuration;
+        import org.apache.ibatis.session.SqlSession;
+        import org.apache.ibatis.session.SqlSessionFactory;
+        import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+        import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;
+        import org.apache.ibatis.type.JdbcType;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
+        import java.io.IOException;
+        import java.io.InputStream;
+        import java.util.Properties;
 
 public class DataBaseSessionManager {
     public final SqlSessionFactory sqlSessionFactory;
+
 
     public DataBaseSessionManager(Properties prop) throws IOException {
         PooledDataSource pooledDataSource = new PooledDataSource();
@@ -53,6 +55,5 @@ public class DataBaseSessionManager {
         return sqlSessionFactory.openSession(autoCommit);
     }
 
-    public void setSqlSessionFactory(SqlSessionFactory sqlSessionFactory) {
-    }
 }
+

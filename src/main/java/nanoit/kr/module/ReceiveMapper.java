@@ -2,16 +2,18 @@ package nanoit.kr.module;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
-import nanoit.kr.queue.InternalQueueImpl;
 import nanoit.kr.domain.message.Payload;
+import nanoit.kr.domain.message.Send;
 import nanoit.kr.extension.Jackson;
+import nanoit.kr.queue.InternalDataType;
+import nanoit.kr.queue.InternalQueueImpl;
 
 @Slf4j
-public class Mapper extends ModuleProcess {
+public class ReceiveMapper extends ModuleProcess {
 
     private final InternalQueueImpl queue;
 
-    public Mapper(String uuid, InternalQueueImpl queue) {
+    public ReceiveMapper(String uuid, InternalQueueImpl queue) {
         super(queue, uuid);
         this.queue = queue;
     }
@@ -32,10 +34,6 @@ public class Mapper extends ModuleProcess {
         return Jackson.getInstance().getObjectMapper().readValue(str, Payload.class);
     }
 
-    private String toString(Payload payload) throws JsonProcessingException {
-        return Jackson.getInstance().getObjectMapper().writeValueAsString(payload);
-    }
-
     @Override
     public void shoutDown() {
 
@@ -50,4 +48,6 @@ public class Mapper extends ModuleProcess {
     public String getUuid() {
         return this.uuid;
     }
+
+
 }
