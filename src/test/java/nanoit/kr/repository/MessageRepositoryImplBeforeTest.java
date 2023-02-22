@@ -10,7 +10,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import javax.swing.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,23 +17,23 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.*;
 
 @Testcontainers
-class MessageRepositoryImplTest extends TestSetup {
+class MessageRepositoryImplBeforeTest extends TestSetup {
 
-    public MessageRepositoryImplTest() throws IOException {
+    public MessageRepositoryImplBeforeTest() throws IOException {
         super();
-        messageRepository.createTable();
+        messageRepositoryBefore.createTable();
     }
 
     @AfterEach
     void tearDown() {
-        messageRepository.commonDeleteTable();
+        messageRepositoryBefore.commonDeleteTable();
     }
 
     @DisplayName("t1 - 정상적으로 Agent 테이블이 생성되어야 한다 ")
     @Test
     void t1() {
         // given & when & then
-        assertThat(messageRepository.commonPing()).isTrue();
+        assertThat(messageRepositoryBefore.commonPing()).isTrue();
     }
 
     @DisplayName("t2 - 테이블에 있는 레코드 갯수 만큼 정상적으로 Count 되어야 한다  ")
@@ -45,7 +44,7 @@ class MessageRepositoryImplTest extends TestSetup {
         insertMessages(count);
 
         // when
-        long actual = messageRepository.commonCount();
+        long actual = messageRepositoryBefore.commonCount();
 
         // then
         assertThat(actual).isEqualTo(count);
@@ -56,7 +55,7 @@ class MessageRepositoryImplTest extends TestSetup {
     @Test
     void t3() {
         // given & when & then
-        assertThat(messageRepository.commonPing()).isTrue();
+        assertThat(messageRepositoryBefore.commonPing()).isTrue();
 
     }
 
@@ -66,11 +65,11 @@ class MessageRepositoryImplTest extends TestSetup {
         // given
         int count = 1000;
         insertMessages(count);
-        long beforeCountInTable = messageRepository.commonCount();
+        long beforeCountInTable = messageRepositoryBefore.commonCount();
 
         // when
-        boolean actual = messageRepository.commonDeleteTable();
-        long afterCountInTable = messageRepository.commonCount();
+        boolean actual = messageRepositoryBefore.commonDeleteTable();
+        long afterCountInTable = messageRepositoryBefore.commonCount();
 
         // then
         assertThat(beforeCountInTable).isEqualTo(count);
@@ -83,13 +82,13 @@ class MessageRepositoryImplTest extends TestSetup {
     void t5() {
         int count = 1000;
         insertMessages(count);
-        long beforeCountInTable = messageRepository.commonCount();
+        long beforeCountInTable = messageRepositoryBefore.commonCount();
 
         // when
         long id = 1;
-        boolean actual = messageRepository.commonDeleteById(id);
-        long afterCountInTable = messageRepository.commonCount();
-        MessageEntity isExist = messageRepository.selectById(id);
+        boolean actual = messageRepositoryBefore.commonDeleteById(id);
+        long afterCountInTable = messageRepositoryBefore.commonCount();
+        MessageEntity isExist = messageRepositoryBefore.selectById(id);
 
         // then
         assertThat(beforeCountInTable).isEqualTo(count);
@@ -104,11 +103,11 @@ class MessageRepositoryImplTest extends TestSetup {
         // given
         int count = 100;
         insertMessages(count);
-        long beforeCountInTable = messageRepository.commonCount();
+        long beforeCountInTable = messageRepositoryBefore.commonCount();
 
 
         // when
-        MessageEntity actual = messageRepository.selectById(count - 12);
+        MessageEntity actual = messageRepositoryBefore.selectById(count - 12);
 
         // then
         assertThat(actual).isNotNull();
@@ -129,8 +128,8 @@ class MessageRepositoryImplTest extends TestSetup {
                 .setContent("안녕하세요");
 
         // when
-        boolean insertResult = messageRepository.insert(expected);
-        MessageEntity actual = messageRepository.selectById(1);
+        boolean insertResult = messageRepositoryBefore.insert(expected);
+        MessageEntity actual = messageRepositoryBefore.selectById(1);
         // then
         assertThat(insertResult).isTrue();
         assertThat(actual).isNotNull();
@@ -148,7 +147,7 @@ class MessageRepositoryImplTest extends TestSetup {
         insertMessages(count);
 
         // then
-        assertThat(messageRepository.commonCount()).isEqualTo(100);
+        assertThat(messageRepositoryBefore.commonCount()).isEqualTo(100);
     }
 
     @DisplayName("t9 - receiveCount 메소드를 실행 하였을때 정상적으로 receive에 필요한 레코드들의 갯수를 가져와야 한다")
@@ -157,16 +156,16 @@ class MessageRepositoryImplTest extends TestSetup {
         // given
         int count = 1;
         List<MessageEntity> list = insertMessages(count);
-        boolean selectedUpdate = messageRepository.selectedUpdate(list);
+        boolean selectedUpdate = messageRepositoryBefore.selectedUpdate(list);
 
         SendAckEntity sendAck = new SendAckEntity(1, MessageResult.SUCCESS.getProperty());
-        messageRepository.sendResultUpdate(1L);
-        boolean updateResult = messageRepository.receiveUpdate(sendAck);
+        messageRepositoryBefore.sendResultUpdate(1L);
+        boolean updateResult = messageRepositoryBefore.receiveUpdate(sendAck);
 
         // when
         assertThat(selectedUpdate).isTrue();
         assertThat(updateResult).isTrue();
-        assertThat(messageRepository.receiveCount()).isEqualTo(1);
+        assertThat(messageRepositoryBefore.receiveCount()).isEqualTo(1);
     }
 
     @DisplayName("t10 - receiveSelectById 메소드를 실행 하였을 때 정상적으로 요청한 Id 값을 가진 레코드를 반환 하여야 한다")
@@ -175,16 +174,16 @@ class MessageRepositoryImplTest extends TestSetup {
         // given
         int count = 1;
         List<MessageEntity> list = insertMessages(count);
-        long recordCount = messageRepository.commonCount();
-        boolean selectedUpdate = messageRepository.selectedUpdate(list);
-        messageRepository.sendResultUpdate(1);
-        System.out.println(messageRepository.selectById(1));
+        long recordCount = messageRepositoryBefore.commonCount();
+        boolean selectedUpdate = messageRepositoryBefore.selectedUpdate(list);
+        messageRepositoryBefore.sendResultUpdate(1);
+        System.out.println(messageRepositoryBefore.selectById(1));
         SendAckEntity sendAck = new SendAckEntity(1, MessageResult.SUCCESS.getProperty());
-        boolean updateResult = messageRepository.receiveUpdate(sendAck);
+        boolean updateResult = messageRepositoryBefore.receiveUpdate(sendAck);
 
 
         // when
-        MessageEntity actual = messageRepository.receiveSelectById(sendAck.getMessageId());
+        MessageEntity actual = messageRepositoryBefore.receiveSelectById(sendAck.getMessageId());
 
         // then
         assertThat(recordCount).isEqualTo(1);
@@ -197,15 +196,15 @@ class MessageRepositoryImplTest extends TestSetup {
     void t11() {
         int count = 3;
         List<MessageEntity> list = insertMessages(count);
-        long recordCount = messageRepository.commonCount();
-        boolean selectedUpdate = messageRepository.selectedUpdate(list);
+        long recordCount = messageRepositoryBefore.commonCount();
+        boolean selectedUpdate = messageRepositoryBefore.selectedUpdate(list);
         for (int i = 1; i < count + 1; i++) {
-            messageRepository.sendResultUpdate(i);
+            messageRepositoryBefore.sendResultUpdate(i);
             SendAckEntity sendAck = new SendAckEntity(i, MessageResult.SUCCESS.getProperty());
-            boolean updateResult = messageRepository.receiveUpdate(sendAck);
+            boolean updateResult = messageRepositoryBefore.receiveUpdate(sendAck);
         }
         // when
-        List<MessageEntity> actual = messageRepository.receiveSelectAll();
+        List<MessageEntity> actual = messageRepositoryBefore.receiveSelectAll();
         System.out.println(actual);
 
         // then
@@ -224,12 +223,12 @@ class MessageRepositoryImplTest extends TestSetup {
         // given
         int count = 1;
         List<MessageEntity> list = insertMessages(count);
-        boolean selectedUpdate = messageRepository.selectedUpdate(list);
-        messageRepository.sendResultUpdate(1);
+        boolean selectedUpdate = messageRepositoryBefore.selectedUpdate(list);
+        messageRepositoryBefore.sendResultUpdate(1);
         SendAckEntity expected = new SendAckEntity(1, MessageResult.SUCCESS.getProperty());
 
         // when
-        boolean updateResult = messageRepository.receiveUpdate(expected);
+        boolean updateResult = messageRepositoryBefore.receiveUpdate(expected);
 
         // then
         assertThat(selectedUpdate).isTrue();
@@ -244,7 +243,7 @@ class MessageRepositoryImplTest extends TestSetup {
         insertMessages(count);
 
         // when
-        List<MessageEntity> actual = messageRepository.sendSelectAll();
+        List<MessageEntity> actual = messageRepositoryBefore.sendSelectAll();
 
         // then
         assertThat(actual.size()).isEqualTo(count);
@@ -268,7 +267,7 @@ class MessageRepositoryImplTest extends TestSetup {
         List<MessageEntity> list = insertMessages(count);
 
         // when
-        boolean selectedUpdate = messageRepository.selectedUpdate(list);
+        boolean selectedUpdate = messageRepositoryBefore.selectedUpdate(list);
 
         // then
         assertThat(selectedUpdate).isTrue();
@@ -280,9 +279,9 @@ class MessageRepositoryImplTest extends TestSetup {
         // given
         int count = 3;
         List<MessageEntity> list = insertMessages(count);
-        boolean selectedUpdate = messageRepository.selectedUpdate(list);
+        boolean selectedUpdate = messageRepositoryBefore.selectedUpdate(list);
         for (int i = 1; i < count + 1; i++) {
-            assertThat(messageRepository.sendResultUpdate(i)).isTrue();
+            assertThat(messageRepositoryBefore.sendResultUpdate(i)).isTrue();
         }
     }
 
@@ -298,7 +297,7 @@ class MessageRepositoryImplTest extends TestSetup {
                     .setContent("안녕하세요" + i);
             list.add(message);
         }
-        messageRepository.insertAll(list);
+        messageRepositoryBefore.insertAll(list);
         return list;
     }
 

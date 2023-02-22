@@ -6,8 +6,8 @@ import nanoit.kr.exception.SelectFailedException;
 import nanoit.kr.queue.InternalDataType;
 import nanoit.kr.queue.InternalQueueImpl;
 import nanoit.kr.service.MessageService;
+import nanoit.kr.service.before.MessageServiceBefore;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -19,8 +19,8 @@ public class DataBaseScheduler {
     private final MessageService messageService;
     private final InternalQueueImpl queue;
 
-    public DataBaseScheduler(MessageService messageService, InternalQueueImpl queue) {
-        this.messageService = messageService;
+    public DataBaseScheduler(InternalQueueImpl queue) {
+        this.messageService = MessageService.;
         this.queue = queue;
         this.scheduledExecutorService = Executors.newScheduledThreadPool(1);
     }
@@ -48,13 +48,12 @@ public class DataBaseScheduler {
         return scheduledExecutorService.isShutdown();
     }
 
-
     public void shutdownRestartScheduler() {
         scheduledExecutorService.shutdown();
         try {
             // awaitThermination
             // ExecutorService가 종료될 때까지 대기
-            //  해당 메소드를 호출하여 모든 작어빙 완료되고 ExecutorService 가 종료될 때까지 기다릴 수있다
+            //  해당 메소드를 호출하여 모든 작업 완료되고 ExecutorService 가 종료될 때까지 기다릴 수있다
 
             if (!scheduledExecutorService.awaitTermination(10, TimeUnit.SECONDS)) {
                 scheduledExecutorService.shutdownNow();

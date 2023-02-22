@@ -1,4 +1,4 @@
-package nanoit.kr.service;
+package nanoit.kr.service.before;
 
 import lombok.extern.slf4j.Slf4j;
 import nanoit.kr.domain.entity.MessageEntity;
@@ -6,36 +6,36 @@ import nanoit.kr.domain.entity.SendAckEntity;
 import nanoit.kr.domain.message.Send;
 import nanoit.kr.exception.SelectFailedException;
 import nanoit.kr.exception.UpdateFailedException;
-import nanoit.kr.repository.MessageRepository;
+import nanoit.kr.repository.before.MessageRepositoryBefore;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class MessageServiceImpl implements MessageService {
-    private final MessageRepository messageRepository;
+public class MessageServiceImplBefore implements MessageServiceBefore {
+    private final MessageRepositoryBefore messageRepositoryBefore;
 
-    public MessageServiceImpl(MessageRepository messageRepository) {
-        this.messageRepository = messageRepository;
+    public MessageServiceImplBefore(MessageRepositoryBefore messageRepositoryBefore) {
+        this.messageRepositoryBefore = messageRepositoryBefore;
     }
 
 
     @Override
-    public boolean isAlive(MessageRepository repository) {
+    public boolean isAlive() {
         try {
-            return repository.commonPing();
+            return messageRepositoryBefore.commonPing();
         } catch (SelectFailedException e) {
             log.error(e.getReason());
-            repository.createTable();
+            messageRepositoryBefore.createTable();
         }
         return false;
     }
 
     @Override
-    public long count(MessageRepository repository) {
+    public long count() {
         try {
-            return repository.commonCount();
+            return messageRepositoryBefore.commonCount();
         } catch (SelectFailedException e) {
             log.error(e.getReason());
         }
@@ -43,14 +43,14 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public List<Send> selectAll(MessageRepository repository) {
+    public List<Send> selectAll() {
         try {
-            List<MessageEntity> messageEntities = repository.sendSelectAll();
+            List<MessageEntity> messageEntities = messageRepositoryBefore.sendSelectAll();
             if (messageEntities.isEmpty()) {
                 throw new SelectFailedException("[MSG-SERVICE] No messages found");
             }
 
-            if (!repository.selectedUpdate(messageEntities)) {
+            if (!messageRepositoryBefore.selectedUpdate(messageEntities)) {
                 throw new UpdateFailedException("[MSG-SERVICE] Error in updating messages");
             }
 
@@ -73,9 +73,9 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public boolean updateSendResults(MessageRepository repository, List<Long> ids) {
+    public boolean updateSendResults(List<Long> ids) {
         try {
-            return repository.sendResultUpdates(ids);
+            return messageRepositoryBefore.sendResultUpdates(ids);
         } catch (UpdateFailedException e) {
             log.error(e.getReason());
         }
@@ -83,9 +83,9 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public boolean updateSendResult(MessageRepository repository, long id) {
+    public boolean updateSendResult(long id) {
         try {
-            return repository.sendResultUpdate(id);
+            return messageRepositoryBefore.sendResultUpdate(id);
         } catch (UpdateFailedException e) {
             log.error(e.getReason());
         }
@@ -93,9 +93,9 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public boolean updateReceiveResult(MessageRepository repository, SendAckEntity sendAck) {
+    public boolean updateReceiveResult(SendAckEntity sendAck) {
         try {
-            return repository.receiveUpdate(sendAck);
+            return messageRepositoryBefore.receiveUpdate(sendAck);
         } catch (UpdateFailedException e) {
             log.error(e.getReason());
 

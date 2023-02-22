@@ -63,6 +63,7 @@ sourceSets {
         resources {
             srcDir "./config/"
             srcDir "./mapper/"
+            srcDir "./log/"
         }
     }
     test {

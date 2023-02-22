@@ -6,8 +6,11 @@ import nanoit.kr.domain.message.Authentication;
 import nanoit.kr.domain.message.Payload;
 import nanoit.kr.domain.message.PayloadType;
 import nanoit.kr.extension.Jackson;
-import nanoit.kr.queue.InternalQueue;
 import nanoit.kr.queue.InternalQueueImpl;
+import nanoit.kr.repository.MessageRepository;
+import nanoit.kr.scheduler.DataBaseScheduler;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
 
 import java.io.*;
 import java.net.Socket;
@@ -31,8 +34,12 @@ public class SessionResource {
     private final BufferedWriter writer;
     private final SendThread send;
     private final ReceiveThread receive;
+    private final MessageRepository messageRepository;
+    private final DataBaseScheduler scheduler;
 
-    public SessionResource(Socket socket, InternalQueueImpl queue, PropertyDto dto) throws IOException {
+    public SessionResource(Socket socket, InternalQueueImpl queue, PropertyDto dto, MessageRepository messageRepository, DataBaseScheduler scheduler) throws IOException {
+        this.scheduler = scheduler;
+        this.messageRepository = messageRepository;
         this.socket = socket;
         this.readThreadStatus = new AtomicBoolean(true);
         this.writeThreadStatus = new AtomicBoolean(true);
@@ -100,7 +107,8 @@ public class SessionResource {
         return this.socket.isClosed();
     }
 
-    public boolean isStreamClose(){
+
+    public boolean isStreamClose() {
         return false;
     }
 

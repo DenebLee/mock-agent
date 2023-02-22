@@ -18,8 +18,6 @@ package nanoit.kr.db;
 
 public class DataBaseSessionManager {
     public final SqlSessionFactory sqlSessionFactory;
-
-
     public DataBaseSessionManager(Properties prop) throws IOException {
         PooledDataSource pooledDataSource = new PooledDataSource();
         pooledDataSource.setDriver(prop.getProperty("driver"));

@@ -1,11 +1,11 @@
-package nanoit.kr.repository;
+package nanoit.kr.repository.before;
 
-import nanoit.kr.domain.PropertyDto;
 import nanoit.kr.domain.entity.MessageEntity;
 import nanoit.kr.domain.entity.SendAckEntity;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Properties;
 
 /*
     count -  사용 가능한 엔티티 수를 반환 ✔
@@ -21,9 +21,9 @@ import java.util.List;
     insertAll(Iterable<S> entities) - 지정된 모든 엔티티 저장 ✔
  */
 
-public interface MessageRepository {
-    static MessageRepository createMessageRepository(PropertyDto dto) throws IOException {
-        return new MessageRepositoryImpl(dto) {
+public interface MessageRepositoryBefore {
+    static MessageRepositoryBefore createMessageRepository(Properties prop) throws IOException {
+        return new MessageRepositoryImplBefore(prop) {
         };
     }
 

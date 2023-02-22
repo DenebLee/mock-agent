@@ -1,9 +1,9 @@
 package nanoit.kr.setup;
 
 
-import nanoit.kr.repository.MessageRepository;
-import nanoit.kr.service.MessageService;
-import nanoit.kr.service.MessageServiceImpl;
+import nanoit.kr.repository.before.MessageRepositoryBefore;
+import nanoit.kr.service.before.MessageServiceBefore;
+import nanoit.kr.service.before.MessageServiceImplBefore;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 
@@ -15,8 +15,8 @@ public class TestSetup {
     static PostgreSQLContainer postgreSQLContainer = new PostgreSQLContainer("postgres:14.5-alpine");
     Properties properties;
 
-    public static MessageRepository messageRepository;
-    public static MessageService messageService;
+    public static MessageRepositoryBefore messageRepositoryBefore;
+    public static MessageServiceBefore messageServiceBefore;
 
     public TestSetup() throws IOException {
         properties = new Properties();
@@ -27,7 +27,7 @@ public class TestSetup {
         properties.setProperty("mapper", "POSTGRESQL.xml");
 
 
-        messageRepository = MessageRepository.createMessageRepository(properties);
-        messageService = new MessageServiceImpl(messageRepository);
+        messageRepositoryBefore = MessageRepositoryBefore.createMessageRepository(properties);
+        messageServiceBefore = new MessageServiceImplBefore(messageRepositoryBefore);
     }
 }

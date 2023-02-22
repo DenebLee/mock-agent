@@ -32,6 +32,7 @@ public class SendThread implements Runnable {
             log.info("[SEND] THREAD START");
             while (sendThreadStatus.get()) {
                 if (authenticationStatus.get()) {
+
                 }
             }
         } catch (Exception e) {

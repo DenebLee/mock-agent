@@ -1,7 +1,6 @@
-package nanoit.kr.repository;
+package nanoit.kr.repository.before;
 
-import nanoit.kr.db.DataBaseSessionManagerBefore;
-import nanoit.kr.domain.PropertyDto;
+import nanoit.kr.db.DataBaseSessionManager;
 import nanoit.kr.domain.entity.MessageEntity;
 import nanoit.kr.domain.entity.SendAckEntity;
 import nanoit.kr.exception.DeleteFailedException;
@@ -12,13 +11,14 @@ import org.apache.ibatis.session.SqlSession;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Properties;
 
-public class MessageRepositoryImpl implements MessageRepository {
+public class MessageRepositoryImplBefore implements MessageRepositoryBefore {
 
-    private final DataBaseSessionManagerBefore sessionManager;
+    private final DataBaseSessionManager sessionManager;
 
-    public MessageRepositoryImpl(PropertyDto dto) throws IOException {
-        this.sessionManager = new DataBaseSessionManagerBefore(dto);
+    public MessageRepositoryImplBefore(Properties prop) throws IOException {
+        this.sessionManager = new DataBaseSessionManager(prop);
         createTable();
     }
 

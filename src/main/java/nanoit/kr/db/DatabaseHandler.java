@@ -1,9 +1,9 @@
 package nanoit.kr.db;
 
 import lombok.extern.slf4j.Slf4j;
-import nanoit.kr.repository.MessageRepository;
-import nanoit.kr.service.MessageService;
-import nanoit.kr.service.MessageServiceImpl;
+import nanoit.kr.repository.before.MessageRepositoryBefore;
+import nanoit.kr.service.before.MessageServiceBefore;
+import nanoit.kr.service.before.MessageServiceImplBefore;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -16,8 +16,8 @@ public class DatabaseHandler {
         this.prop = prop;
     }
 
-    public MessageService getMessageService() throws IOException {
-        MessageRepository messageRepository = MessageRepository.createMessageRepository(prop);
-        return new MessageServiceImpl(messageRepository);
+    public MessageServiceBefore getMessageService() throws IOException {
+        MessageRepositoryBefore messageRepositoryBefore = MessageRepositoryBefore.createMessageRepository(prop);
+        return new MessageServiceImplBefore(messageRepositoryBefore);
     }
 }
