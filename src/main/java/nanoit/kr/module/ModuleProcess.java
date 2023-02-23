@@ -4,10 +4,10 @@ import nanoit.kr.queue.InternalQueueImpl;
 
 public abstract class ModuleProcess implements Runnable {
 
-    public static ModuleProcessManagerImpl moduleProcessManagerImpl;
+    public static ModuleProcessManager moduleProcessManager;
 
     static {
-        moduleProcessManagerImpl = new ModuleProcessManagerImpl();
+        moduleProcessManager = new ModuleProcessManager();
     }
 
     protected final String uuid;
@@ -26,7 +26,7 @@ public abstract class ModuleProcess implements Runnable {
     public ModuleProcess(InternalQueueImpl queue, String uuid) {
         this.queue = queue;
         this.uuid = uuid;
-        moduleProcessManagerImpl.register(this);
+        moduleProcessManager.register(this);
         this.status = Status.INIT;
         this.lastRunningTime = System.currentTimeMillis();
     }

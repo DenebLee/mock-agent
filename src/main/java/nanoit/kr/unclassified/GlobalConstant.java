@@ -16,6 +16,5 @@ public final class GlobalConstant {
 
     // FILE
     public static final String CONFIG_FILE_PATH = System.getProperty("user.dir") + "/config";
-    public static final SimpleDateFormat DATE_FOMAT = new SimpleDateFormat("yyyy-MM-dd H:mm:ss");
     public static final String FILE_FORMAT = ".xml";
 }

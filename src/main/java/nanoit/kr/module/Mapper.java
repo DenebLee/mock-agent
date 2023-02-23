@@ -3,17 +3,16 @@ package nanoit.kr.module;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
 import nanoit.kr.domain.message.Payload;
-import nanoit.kr.domain.message.Send;
 import nanoit.kr.extension.Jackson;
 import nanoit.kr.queue.InternalDataType;
 import nanoit.kr.queue.InternalQueueImpl;
 
 @Slf4j
-public class ReceiveMapper extends ModuleProcess {
+public class Mapper extends ModuleProcess {
 
     private final InternalQueueImpl queue;
 
-    public ReceiveMapper(String uuid, InternalQueueImpl queue) {
+    public Mapper(String uuid, InternalQueueImpl queue) {
         super(queue, uuid);
         this.queue = queue;
     }
@@ -22,7 +21,17 @@ public class ReceiveMapper extends ModuleProcess {
     @Override
     public void run() {
         try {
-            while (true) {
+            while (this.flag) {
+                Object object = queue.subscribe(InternalDataType.RECEIVE_MAPPER);
+                if (object != null) {
+                    if (object instanceof String) {
+                        String message = (String) object;
+                        Payload payload = Jackson.getInstance().getObjectMapper().readValue(message, Payload.class);
+                        if (queue.publish(InternalDataType.FILTER, payload)) {
+                            log.debug("[MAPPER] Message Sent To Filter Success data : [{}]", payload);
+                        }
+                    }
+                }
 
             }
         } catch (Exception e) {

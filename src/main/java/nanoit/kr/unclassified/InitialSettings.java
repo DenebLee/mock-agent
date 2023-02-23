@@ -1,5 +1,6 @@
 package nanoit.kr.unclassified;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import nanoit.kr.domain.PropertyDto;
 import org.w3c.dom.Document;
@@ -26,7 +27,8 @@ import java.util.List;
 @Slf4j
 public class InitialSettings {
 
-    private final List<PropertyDto> propertyDtoList;
+
+    public final List<PropertyDto> propertyDtoList;
     private final List<File> configurationFiles;
 
     public InitialSettings() {
@@ -57,10 +59,10 @@ public class InitialSettings {
     // 같아도 되는 값
     // driver ,database 이름, port,id, pwd, email
     // 달라야 할 값
-    // dbUsername , DBMS접속하는 url
+    // dbId
     public boolean isPropertyDtoValid(PropertyDto dto) {
         for (PropertyDto data : propertyDtoList) {
-            if (data.getUrl().equals(dto.getUrl()) || data.getDbUsername().equals(dto.getDbUsername()) || data.getUserAgent() == dto.getUserAgent()) {
+            if (data.getUrl().equals(dto.getUrl()) || data.getDbId().equals(dto.getDbId()) || data.getUserAgent() == dto.getUserAgent()) {
                 log.warn("[INITIAL-SETTINGS] Creation of dto failed because xml file with same value exists");
                 return false;
             }
@@ -78,8 +80,6 @@ public class InitialSettings {
         for (File file : files) {
             if (isDuplicateFile(file)) {
                 configurationFiles.add(file);
-            } else {
-                log.warn("[INITIAL-SETTINGS] Failed to regist file");
             }
             PropertyDto dto = convert(file);
             if (dto != null && isPropertyDtoValid(dto)) {
@@ -106,7 +106,7 @@ public class InitialSettings {
             doc.appendChild(rootElement);
 
             // Add entry elements
-            String[] keys = {"DBMS", "DB_URL", "DB_NAME", "DB_PWD", "TCP_URL", "TCP_PORT", "USER_AGENT", "USER_NAME", "USER_PWD", "USER_EMAIL"};
+            String[] keys = {"DBMS", "DB_URL", "DB_NAME", "DB_ID", "DB_PWD", "TCP_URL", "TCP_PORT", "USER_AGENT", "USER_ID", "USER_PWD", "USER_EMAIL"};
 
             for (String key : keys) {
                 Element entry = doc.createElement("entry");
@@ -184,8 +184,12 @@ public class InitialSettings {
                         case "DB_URL":
                             propertyDto.setUrl(value);
                             break;
+
                         case "DB_NAME":
-                            propertyDto.setDbUsername(value);
+                            propertyDto.setDbName(value);
+                            break;
+                        case "DB_ID":
+                            propertyDto.setDbId(value);
                             break;
                         case "DB_PWD":
                             propertyDto.setDbPwd(value);
@@ -199,7 +203,7 @@ public class InitialSettings {
                         case "USER_AGENT":
                             propertyDto.setUserAgent(Integer.parseInt(value));
                             break;
-                        case "USER_NAME":
+                        case "USER_ID":
                             propertyDto.setUserId(value);
                             break;
                         case "USER_PWD":

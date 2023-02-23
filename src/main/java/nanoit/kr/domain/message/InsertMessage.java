@@ -3,11 +3,14 @@ package nanoit.kr.domain.message;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ErrorPayload {
-    private long messageNum;
-    private String reason;
+@Accessors(chain = true)
+
+public class InsertMessage {
+    private String uuid;
+    private SendAck sendAck;
 }

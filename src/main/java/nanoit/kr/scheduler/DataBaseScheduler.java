@@ -1,12 +1,12 @@
 package nanoit.kr.scheduler;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import nanoit.kr.db.DatabaseHandler;
 import nanoit.kr.domain.message.Send;
 import nanoit.kr.exception.SelectFailedException;
-import nanoit.kr.queue.InternalDataType;
-import nanoit.kr.queue.InternalQueueImpl;
 import nanoit.kr.service.MessageService;
-import nanoit.kr.service.before.MessageServiceBefore;
+import nanoit.kr.session.SessionResource;
 
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -17,29 +17,41 @@ import java.util.concurrent.TimeUnit;
 public class DataBaseScheduler {
     private final ScheduledExecutorService scheduledExecutorService;
     private final MessageService messageService;
-    private final InternalQueueImpl queue;
+    private final DatabaseHandler databaseHandler;
+    private final SessionResource sessionResource;
+    @Getter
+    private boolean shedulerState = false;
 
-    public DataBaseScheduler(InternalQueueImpl queue) {
-        this.messageService = MessageService.;
-        this.queue = queue;
+
+    public DataBaseScheduler(SessionResource resource) {
+        this.databaseHandler = new DatabaseHandler();
+        this.messageService = databaseHandler.getMessageService1();
+        this.sessionResource = resource;
         this.scheduledExecutorService = Executors.newScheduledThreadPool(1);
+
+        start();
     }
 
     public void start() {
         scheduledExecutorService.scheduleWithFixedDelay(() -> {
             try {
-                List<Send> selectList = messageService.selectAll();
+                List<Send> selectList = messageService.selectAll(sessionResource.getMessageRepository());
                 for (Send send : selectList) {
                     if (send == null) {
                         throw new SelectFailedException("[SCHEDULER] Data Select from DB Error");
                     }
-                    if (!sendToMapperQueue(selectList)) {
+                    if (!sendToMapperQueue(send)) {
                         throw new RuntimeException();
                     }
                 }
             } catch (Exception e) {
                 log.error("[SCHEDULER] Exception occurred in the scheduler: {}", e.getMessage(), e);
-                shutdownRestartScheduler();
+                this.shedulerState = true;
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException ex) {
+                    throw new RuntimeException(ex);
+                }
             }
         }, 0, 2, TimeUnit.SECONDS);
     }
@@ -71,12 +83,12 @@ public class DataBaseScheduler {
         }
     }
 
-    public boolean sendToMapperQueue(List<Send> sendList) {
-        if (sendList == null) {
+    public boolean sendToMapperQueue(Send send) {
+        if (send == null) {
             return false;
         }
-        if (queue.publish(InternalDataType.SENDER, sendList)) {
-            log.debug("[SCHEDULER] SELECT DATA FROM TABLE SUCCESS !!! number Imported : [{}]", sendList.size());
+        if (sessionResource.getSendFromSchedulerQueue().offer(send)) {
+            log.debug("[SCHEDULER@{}] SELECT DATA FROM TABLE SUCCESS !!! Data Imported : [{}]", sessionResource.getSocket(), send);
             return true;
         }
         return false;

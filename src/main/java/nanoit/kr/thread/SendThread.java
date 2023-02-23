@@ -7,6 +7,7 @@ import nanoit.kr.queue.InternalQueueImpl;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
@@ -14,11 +15,11 @@ import java.util.function.Consumer;
 public class SendThread implements Runnable {
     private final Consumer<String> cleaner;
     private final BufferedWriter bufferedWriter;
-    private final InternalQueueImpl queue;
+    private final LinkedBlockingQueue queue;
     private AtomicBoolean authenticationStatus;
     private AtomicBoolean sendThreadStatus;
 
-    public SendThread(Consumer<String> cleaner, InternalQueueImpl queue, BufferedWriter bufferedWriter, AtomicBoolean authenticationStatus, AtomicBoolean sendThreadStatus) {
+    public SendThread(Consumer<String> cleaner, LinkedBlockingQueue queue, BufferedWriter bufferedWriter, AtomicBoolean authenticationStatus, AtomicBoolean sendThreadStatus) {
         this.cleaner = cleaner;
         this.queue = queue;
         this.bufferedWriter = bufferedWriter;

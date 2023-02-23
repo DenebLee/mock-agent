@@ -22,8 +22,8 @@ public class DataBaseSessionManagerBefore {
     public DataBaseSessionManagerBefore(PropertyDto dto) throws IOException {
         PooledDataSource pooledDataSource = new PooledDataSource();
         pooledDataSource.setDriver(dto.getDbDriver());
-        pooledDataSource.setUrl(dto.getUrl());
-        pooledDataSource.setUsername(dto.getDbUsername());
+        pooledDataSource.setUrl(dto.getUrl()+ dto.getDbName());
+        pooledDataSource.setUsername(dto.getDbId());
         pooledDataSource.setPassword(dto.getDbPwd());
         pooledDataSource.setPoolMaximumActiveConnections(5);
         pooledDataSource.setPoolMaximumIdleConnections(5);

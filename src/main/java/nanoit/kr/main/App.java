@@ -1,34 +1,44 @@
 package nanoit.kr.main;
 
 import lombok.extern.slf4j.Slf4j;
-import nanoit.kr.queue.InternalQueueImpl;
+import nanoit.kr.manager.SchedulerManager;
+import nanoit.kr.manager.SessionManager;
 import nanoit.kr.module.Filter;
+import nanoit.kr.module.Insert;
+import nanoit.kr.module.Mapper;
+import nanoit.kr.queue.InternalQueueImpl;
+import nanoit.kr.unclassified.InitialSettings;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
 import java.util.UUID;
 
 
 @Slf4j
 public class App {
-    private static final String CONFIG_DIR_PATH = System.getProperty("user.dir") + "/config";
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd H:mm:ss");
-
     public static void main(String[] args) {
         try {
-            // config 파일에 properties 파일이 있는지 체크
-            if (!isConfigDirectoryExist()) {
-                log.error("[SYSTEM] Property file does not exist in config file");
+            InitialSettings settings = new InitialSettings();
+            // config 파일에 SMS.xml 파일이 존재하지 않으면 사용자가 설정 값을 넣을 수 있도록 xml 예제 파일 하나 생성해줌
+            if (!settings.isConfigDirectoryExist()) {
+                log.info("[SYSTEM] Systemfile does not exist in config Folder");
+                settings.makeConfigSettingXmlFile();
+            }
+            // list에 add하는 부분 오류나면 시작단계이기에 프로그램 중단되도록
+            if (!settings.addListDtoAndFile()) {
                 System.exit(-1);
             }
 
+            InternalQueueImpl queue = new InternalQueueImpl();
 
-            InternalQueueImpl internalQueueImpl = new InternalQueueImpl();
-            new Filter(getRandomUuid(), internalQueueImpl);
-//            new Insert(getRandomUuid(), internalQueue);
+            SchedulerManager schedulerMGR = new SchedulerManager();
+            SessionManager sessionMGR = new SessionManager(schedulerMGR, queue);
+
+            new Mapper(getRandomUuid(), queue);
+            new Filter(getRandomUuid(), queue, sessionMGR);
+            new Insert(getRandomUuid(), queue, sessionMGR);
+
+            schedulerMGR.start();
+            sessionMGR.start();
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -36,14 +46,5 @@ public class App {
 
     private static String getRandomUuid() {
         return UUID.randomUUID().toString();
-    }
-
-    private static boolean isConfigDirectoryExist() throws IOException {
-        Path configDirPath = Paths.get(CONFIG_DIR_PATH);
-        boolean isDirectoryExist = Files.isDirectory(configDirPath);
-        boolean isPropertiesExist = Files.list(configDirPath)
-                .anyMatch(path -> path.toString().endsWith(".xml"));
-
-        return isDirectoryExist && isPropertiesExist;
     }
 }

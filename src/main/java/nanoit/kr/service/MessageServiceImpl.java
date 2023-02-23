@@ -14,11 +14,6 @@ import java.util.stream.Collectors;
 
 @Slf4j
 public class MessageServiceImpl implements MessageService {
-    private final MessageRepository messageRepository;
-
-    public MessageServiceImpl(MessageRepository messageRepository) {
-        this.messageRepository = messageRepository;
-    }
 
 
     @Override

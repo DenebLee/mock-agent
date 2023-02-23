@@ -1,8 +1,8 @@
 package nanoit.kr.module;
 
 import lombok.extern.slf4j.Slf4j;
+import nanoit.kr.module.ModuleProcess;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -11,7 +11,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
-public class ModuleProcessManagerImpl {
+public class ModuleProcessManager {
 
     private final Map<String, ModuleProcess> objectMap = new ConcurrentHashMap<>();
     private final Map<String, Thread> threadMap = new ConcurrentHashMap<>();
@@ -19,7 +19,7 @@ public class ModuleProcessManagerImpl {
     private static final long DEAD_LINE = 3 * 60 * 1000L; // 1000 * 60 * 3 = 3분
 
 
-    public ModuleProcessManagerImpl() {
+    public ModuleProcessManager() {
         scheduledExecutorService.scheduleAtFixedRate(this::monitor, 1000, 1000, TimeUnit.MILLISECONDS);
         monitor();
     }

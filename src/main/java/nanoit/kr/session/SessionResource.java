@@ -1,31 +1,40 @@
-package nanoit.kr.thread;
+package nanoit.kr.session;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import nanoit.kr.domain.PropertyDto;
 import nanoit.kr.domain.message.Authentication;
 import nanoit.kr.domain.message.Payload;
 import nanoit.kr.domain.message.PayloadType;
+import nanoit.kr.domain.message.Send;
 import nanoit.kr.extension.Jackson;
 import nanoit.kr.queue.InternalQueueImpl;
 import nanoit.kr.repository.MessageRepository;
 import nanoit.kr.scheduler.DataBaseScheduler;
-import org.apache.ibatis.session.SqlSession;
-import org.apache.ibatis.session.SqlSessionFactory;
+import nanoit.kr.thread.ReceiveThread;
+import nanoit.kr.thread.SendThread;
 
 import java.io.*;
 import java.net.Socket;
 import java.util.UUID;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
 public class SessionResource {
-    private AtomicBoolean readThreadStatus;
-    private AtomicBoolean writeThreadStatus;
-    private AtomicBoolean authenticationStatus;
+    private final AtomicBoolean readThreadStatus = new AtomicBoolean(true);
+    private final AtomicBoolean writeThreadStatus = new AtomicBoolean(true);
+    private final AtomicBoolean authenticationStatus = new AtomicBoolean(false);
+    @Getter
     private final Socket socket;
+    @Getter
     private final PropertyDto dto;
+    @Getter
+    private final MessageRepository messageRepository;
+    @Getter
+    private final LinkedBlockingQueue<Send> sendFromSchedulerQueue;
 
-    // Make Internal Resources
+    // Internal resources
     private final Thread writeThread;
     private final Thread receiveThread;
     private final InputStreamReader inputStreamReader;
@@ -34,16 +43,12 @@ public class SessionResource {
     private final BufferedWriter writer;
     private final SendThread send;
     private final ReceiveThread receive;
-    private final MessageRepository messageRepository;
-    private final DataBaseScheduler scheduler;
 
-    public SessionResource(Socket socket, InternalQueueImpl queue, PropertyDto dto, MessageRepository messageRepository, DataBaseScheduler scheduler) throws IOException {
-        this.scheduler = scheduler;
+
+    public SessionResource(Socket socket, InternalQueueImpl queue, PropertyDto dto, MessageRepository messageRepository) throws IOException {
+        this.sendFromSchedulerQueue = new LinkedBlockingQueue<>();
         this.messageRepository = messageRepository;
         this.socket = socket;
-        this.readThreadStatus = new AtomicBoolean(true);
-        this.writeThreadStatus = new AtomicBoolean(true);
-        this.authenticationStatus = new AtomicBoolean(false);
         this.dto = dto;
 
         //initialize Internal Resources
@@ -52,7 +57,7 @@ public class SessionResource {
         this.reader = new BufferedReader(inputStreamReader);
         this.writer = new BufferedWriter(outputStreamWriter);
 
-        this.send = new SendThread(this::writeThreadCleaner, queue, writer, authenticationStatus, writeThreadStatus);
+        this.send = new SendThread(this::writeThreadCleaner, sendFromSchedulerQueue, writer, authenticationStatus, writeThreadStatus);
         this.receive = new ReceiveThread(this::receiveThreadCleaner, queue, reader, readThreadStatus);
 
         this.receiveThread = new Thread(receive);
@@ -61,37 +66,43 @@ public class SessionResource {
         this.writeThread.setName("WRITE-THREAD");
     }
 
-    public void start() throws IOException {
-        if (!sendAuthentication(dto)) {
-            log.error("[SEND] DATA SEND TO G/W FAILED");
+    public void start() {
+        try {
+            if (!sendAuthentication(dto)) {
+                log.error("[SESSION-RESOURCE@{}] DATA SEND TO G/W FAILED", socket);
+            }
+            this.receiveThread.start();
+            this.writeThread.start();
+        } catch (IOException e) {
+            log.error("[SESSION-RESOURCE@{}] AN IO EXCEPTION OCCURRED: {}", socket, e.getMessage(), e);
+        } catch (Exception e) {
+            log.error("[SESSION-RESOURCE@{}] AN EXCEPTION OCCURRED: {}", socket, e.getMessage(), e);
         }
-        this.receiveThread.start();
-        this.writeThread.start();
     }
 
     public void writeThreadCleaner(String calledClassName) {
         try {
-            log.info("[THREAD-RESOURCE@{}] name = {} called cleaner", calledClassName, socket);
+            log.info("[SESSION-RESOURCE@{}] name = {} called cleaner", socket, calledClassName);
             writeThreadStatus.compareAndSet(true, false);
             writeThread.interrupt();
             this.socket.shutdownInput();
             readThreadStatus.compareAndSet(true, false);
             connectClose();
         } catch (IOException e) {
-            log.error("[THREAD-RESOURCE@{}] name = {} SOCKET INPUT STREAM CLOSE FAILED", socket, calledClassName, e);
+            log.error("[SESSION-RESOURCE@{}] name = {} SOCKET INPUT STREAM CLOSE FAILED", socket, calledClassName, e);
         }
     }
 
     public void receiveThreadCleaner(String calledClassName) {
         try {
-            log.info("[RESOURCE] name = {} called cleaner", calledClassName);
+            log.info("[SESSION-RESOURCE@{}] name = {} called cleaner", socket, calledClassName);
             readThreadStatus.compareAndSet(true, false);
             receiveThread.interrupt();
             this.socket.shutdownOutput();
             writeThreadStatus.compareAndSet(true, false);
             connectClose();
         } catch (IOException e) {
-            log.error("[THREAD-RESOURCE@{}] name = {} SOCKET OUT STREAM CLOSE FAILED", socket, calledClassName, e);
+            log.error("[SESSION-RESOURCE@{}] name = {} SOCKET OUT STREAM CLOSE FAILED", socket, calledClassName, e);
         }
     }
 
@@ -105,6 +116,25 @@ public class SessionResource {
 
     public boolean isSocketClose() {
         return this.socket.isClosed();
+    }
+
+    public boolean kill() throws IOException {
+        readThreadStatus.compareAndSet(true, false);
+        writeThreadStatus.compareAndSet(true, false);
+        this.socket.shutdownOutput();
+        if (!isSocketClose()) {
+            log.warn("[SESSION-RESOURCE@{}] Socket is not close", socket);
+            return false;
+        }
+        if (!socket.isOutputShutdown() && !socket.isInputShutdown()) {
+            log.warn("[SESSION-RESOURCE@{}] Streams are not close", socket);
+            return false;
+        }
+        if (!writeThread.isInterrupted() && !receiveThread.isInterrupted()) {
+            log.warn("[SESSION-RESOURCE@{}] 이 스레드 들은 죽지도 않는 좀비입니다", socket);
+            return false;
+        }
+        return true;
     }
 
 
@@ -126,7 +156,7 @@ public class SessionResource {
         authenticationData = authenticationData + "\n";
         writer.write(authenticationData);
         writer.flush();
-        log.info("[THREAD-RESOURCE@{}] DATA SEND TO G/W SUCCESS => DATA : {}", dto, socket);
+        log.info("[SESSION-RESOURCE@{}] DATA SEND TO G/W SUCCESS => DATA : {}", socket, dto);
         return true;
     }
 }
