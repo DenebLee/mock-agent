@@ -73,15 +73,17 @@ public class InitialSettings {
 
     public boolean addListDtoAndFile() {
         File[] files = new File(GlobalConstant.CONFIG_FILE_PATH).listFiles();
+        PropertyDto dto = new PropertyDto();
         if (files == null) {
             log.warn("[INITIAL-SETTINGS] No configuration files found");
             return false;
         }
+
         for (File file : files) {
             if (isDuplicateFile(file)) {
                 configurationFiles.add(file);
             }
-            PropertyDto dto = convert(file);
+            dto = convert(file);
             if (dto != null && isPropertyDtoValid(dto)) {
                 propertyDtoList.add(dto);
             } else {
@@ -89,6 +91,9 @@ public class InitialSettings {
             }
         }
         if (!propertyDtoList.isEmpty() && Arrays.stream(files).count() == configurationFiles.size()) {
+            if (!propertyDtoList.contains(dto)) {
+                log.info("[INITIAL-SETTINGS] new Dto Detected)");
+            }
             log.info("[INITIAL-SETTINGS] Success To add DTO count : {} and FIle count : {}", propertyDtoList.size(), configurationFiles.size());
             return true;
         }

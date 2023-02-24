@@ -23,7 +23,7 @@ public class Filter extends ModuleProcess {
     public void run() {
         try {
             while (this.flag) {
-                Object object = queue.subscribe(InternalDataType.FILTER);
+                Object object = queue.receiveSubscribe(InternalDataType.FILTER);
                 if (object != null && object instanceof Payload) {
                     Payload payload = (Payload) object;
                     if (validatePayload(payload)) {
@@ -33,11 +33,11 @@ public class Filter extends ModuleProcess {
                                 if (payload.getData() instanceof ErrorPayload) {
                                     ErrorPayload errorPayload = (ErrorPayload) payload.getData();
                                     log.warn("[FILTER] Error Message Catch reason : [{}]", errorPayload.getReason());
-                                    queue.publish(InternalDataType.INSERT, new SendAck(errorPayload.getMessageNum(), MessageResult.FAILED));
+                                    queue.receivePublish(InternalDataType.INSERT, new SendAck(errorPayload.getMessageNum(), MessageResult.FAILED));
                                 }
                                 SendAck sendAck = Jackson.getInstance().getObjectMapper().convertValue(payload.getData(), SendAck.class);
                                 if (sendAck.getResult().equals(MessageResult.SUCCESS)) {
-                                    if (queue.publish(InternalDataType.INSERT, new InsertMessage(payload.getMessageUuid(), sendAck))) {
+                                    if (queue.receivePublish(InternalDataType.INSERT, new InsertMessage(payload.getMessageUuid(), sendAck))) {
                                         log.debug("[FILTER] Message Send To Insert Success message :[{}]", sendAck);
                                     }
                                 }

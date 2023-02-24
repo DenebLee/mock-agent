@@ -11,13 +11,15 @@ import java.util.function.Consumer;
 @Slf4j
 public class ReceiveThread implements Runnable {
     private final Consumer<String> cleaner;
-    private final InternalQueueImpl queue;
     private final BufferedReader bufferedReader;
     private final AtomicBoolean readThreadStatus;
+    private final InternalQueueImpl queue;
+    private final String uuid;
 
-    public ReceiveThread(Consumer<String> cleaner, InternalQueueImpl queue, BufferedReader bufferedReader, AtomicBoolean readThreadStatus) {
+    public ReceiveThread(String uuid, Consumer<String> cleaner, InternalQueueImpl internalQueue, BufferedReader bufferedReader, AtomicBoolean readThreadStatus) {
+        this.uuid = uuid;
+        this.queue = internalQueue;
         this.cleaner = cleaner;
-        this.queue = queue;
         this.bufferedReader = bufferedReader;
         this.readThreadStatus = readThreadStatus;
     }
@@ -25,18 +27,18 @@ public class ReceiveThread implements Runnable {
     @Override
     public void run() {
         try {
-            log.info("[RECEIVE] RECEIVE - THREAD START");
+            log.info("[REV-THREAD@{}] RECEIVE - THREAD START", uuid);
             while (readThreadStatus.get()) {
                 String receiveData = bufferedReader.readLine();
                 if (receiveData != null) {
-                    log.info("[RECEIVE] RECEIVE DATA : [{}]", receiveData);
-                    if (queue.publish(InternalDataType.RECEIVE_MAPPER, receiveData)) {
-                        log.debug("[RECEIVE] DATA SEND TO MAPPER data : [{}]", receiveData);
+                    log.info("[REV-THREAD@{}] RECEIVE DATA : [{}]", uuid, receiveData);
+                    if (!queue.receivePublish(InternalDataType.RECEIVE_MAPPER, receiveData)) {
+                        log.error("[REV-THREAD@{}] Failed to insert response message into queue", uuid);
                     }
                 }
             }
         } catch (Exception e) {
-            log.warn("[RECEIVE] terminating ", e);
+            log.warn("[REV-THREAD@{}] terminating ----", uuid, e);
             cleaner.accept(this.getClass().getName());
         }
     }

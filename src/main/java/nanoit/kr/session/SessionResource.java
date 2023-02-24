@@ -6,18 +6,15 @@ import nanoit.kr.domain.PropertyDto;
 import nanoit.kr.domain.message.Authentication;
 import nanoit.kr.domain.message.Payload;
 import nanoit.kr.domain.message.PayloadType;
-import nanoit.kr.domain.message.Send;
 import nanoit.kr.extension.Jackson;
 import nanoit.kr.queue.InternalQueueImpl;
 import nanoit.kr.repository.MessageRepository;
-import nanoit.kr.scheduler.DataBaseScheduler;
 import nanoit.kr.thread.ReceiveThread;
 import nanoit.kr.thread.SendThread;
 
 import java.io.*;
 import java.net.Socket;
 import java.util.UUID;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
@@ -27,13 +24,7 @@ public class SessionResource {
     private final AtomicBoolean authenticationStatus = new AtomicBoolean(false);
     @Getter
     private final Socket socket;
-    @Getter
     private final PropertyDto dto;
-    @Getter
-    private final MessageRepository messageRepository;
-    @Getter
-    private final LinkedBlockingQueue<Send> sendFromSchedulerQueue;
-
     // Internal resources
     private final Thread writeThread;
     private final Thread receiveThread;
@@ -43,22 +34,26 @@ public class SessionResource {
     private final BufferedWriter writer;
     private final SendThread send;
     private final ReceiveThread receive;
+    private final InternalQueueImpl queue;
+    private final String uuid;
+    private final String duplicateKey;
 
 
-    public SessionResource(Socket socket, InternalQueueImpl queue, PropertyDto dto, MessageRepository messageRepository) throws IOException {
-        this.sendFromSchedulerQueue = new LinkedBlockingQueue<>();
-        this.messageRepository = messageRepository;
-        this.socket = socket;
+    public SessionResource(String uuid, Socket socket, PropertyDto dto, InternalQueueImpl queue, MessageRepository repository) throws IOException {
+        this.uuid = uuid;
         this.dto = dto;
+        this.duplicateKey = uuid + dto.getDbName();
 
+        this.queue = queue;
+        this.socket = socket;
         //initialize Internal Resources
         this.inputStreamReader = new InputStreamReader(socket.getInputStream());
         this.outputStreamWriter = new OutputStreamWriter(socket.getOutputStream());
         this.reader = new BufferedReader(inputStreamReader);
         this.writer = new BufferedWriter(outputStreamWriter);
 
-        this.send = new SendThread(this::writeThreadCleaner, sendFromSchedulerQueue, writer, authenticationStatus, writeThreadStatus);
-        this.receive = new ReceiveThread(this::receiveThreadCleaner, queue, reader, readThreadStatus);
+        this.send = new SendThread(repository,uuid, duplicateKey, this::writeThreadCleaner, queue, writer, authenticationStatus, writeThreadStatus);
+        this.receive = new ReceiveThread(uuid, this::receiveThreadCleaner, queue, reader, readThreadStatus);
 
         this.receiveThread = new Thread(receive);
         this.receiveThread.setName("RECEIVE-THREAD");
@@ -68,11 +63,13 @@ public class SessionResource {
 
     public void start() {
         try {
+
             if (!sendAuthentication(dto)) {
                 log.error("[SESSION-RESOURCE@{}] DATA SEND TO G/W FAILED", socket);
             }
             this.receiveThread.start();
             this.writeThread.start();
+
         } catch (IOException e) {
             log.error("[SESSION-RESOURCE@{}] AN IO EXCEPTION OCCURRED: {}", socket, e.getMessage(), e);
         } catch (Exception e) {
@@ -150,7 +147,7 @@ public class SessionResource {
         Payload payload = new Payload();
         payload
                 .setType(PayloadType.AUTHENTICATION)
-                .setMessageUuid(UUID.randomUUID().toString())
+                .setMessageUuid(duplicateKey)
                 .setData(new Authentication(dto.getUserAgent(), dto.getUserId(), dto.getUserPwd(), dto.getUserEmail()));
         String authenticationData = Jackson.getInstance().getObjectMapper().writeValueAsString(payload);
         authenticationData = authenticationData + "\n";

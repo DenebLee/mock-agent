@@ -11,6 +11,7 @@ import nanoit.kr.session.SessionResource;
 import nanoit.kr.unclassified.InitialSettings;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.List;
 import java.util.Map;
@@ -24,23 +25,23 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class SessionManager {
     private List<PropertyDto> initializeList;
-    private ConcurrentHashMap<String, Pair<PropertyDto, SessionResource>> currentlySessionList;
-    private ConcurrentHashMap<String, Pair<DataBaseScheduler, MessageRepository>> schedulerRepositoryList;
+
+    private final ConcurrentHashMap<String, Pair<PropertyDto, SessionResource>> currentlySessionList;
+    private final ConcurrentHashMap<String, Pair<DataBaseScheduler, MessageRepository>> schedulerRepositoryList;
     private ScheduledExecutorService scheduledExecutorService;
 
     private InitialSettings settings;
     private DataBaseScheduler scheduler;
-    private SchedulerManager manager;
+    private SchedulerManager schedulerManager;
+    private InternalQueueImpl internalQueue;
 
-    // For resource
-    private InternalQueueImpl queue;
 
-    public SessionManager(SchedulerManager manager, InternalQueueImpl queue) {
-        this.manager = manager;
+    public SessionManager(SchedulerManager schedulerManager, InternalQueueImpl internalQueue) {
+        this.internalQueue = internalQueue;
+        this.schedulerManager = schedulerManager;
         this.settings = new InitialSettings();
         this.currentlySessionList = new ConcurrentHashMap<>();
         this.schedulerRepositoryList = new ConcurrentHashMap<>();
-        this.queue = queue;
         this.scheduledExecutorService = new ScheduledThreadPoolExecutor(2);
     }
 
@@ -54,7 +55,6 @@ public class SessionManager {
     private Runnable makeSession = () -> {
         try {
             // initialize -> PropertyDto 갯수만큼 session 생성
-
             // 최초 실행은 메인 스레드가 넘겨주는 list 로 해결
             // 세션마다 할당되는 것
             // 1. scheduler (계정마다 생성되지만 만약 같은 테이블로 접근한다면 생성 x)
@@ -62,65 +62,88 @@ public class SessionManager {
             settings.addListDtoAndFile();
 
             for (PropertyDto property : settings.getPropertyDtoList()) {
-                if (property.isUsed()) {
-                    String uuid = UUID.randomUUID().toString();
-                    property.setUsed(true);
 
-                    log.info("들어오는 DTO 값 확인  : {} ", property);
-                    if (!currentlySessionList.containsKey(uuid)) {
+                // Insert 모듈에서 key값으로 resource를 찾을 때 사용 혹은 관리 용
+                //  Repository와 스케줄러는 동일한 dbms를 사용한다면 같아야 하기 때문에 key값을 따로 나눔
+                String resourceKey = UUID.randomUUID().toString();
+
+                // 현재 사용되지 않는 계정의 dto값 앞서 InitialSetting 에서 검증 단계 거침
+                if (!property.isUsed()) {
+
+                    // resource key값은 uuid 원값
+                    // duplicateKey는 resourceKey + dbname;
+                    // 메시지를 보낼때는 resourceKey 값에서 dbname을 추가해서 보냄 (같은 DB를 사용할 경우 유용)
+                    Socket socket = new Socket();
+
+                    // 사용되지 않는 계정이지만 같은 DBMS를 사용하는 지 여부
+                    if (isDuplicateScheduler(property) != null) {
+                        String duplicateKey = isDuplicateScheduler(property);
+                        DataBaseScheduler scheduler = getScheduler(duplicateKey);
+                        MessageRepository repository = getRepository(duplicateKey);
+                        socket.connect(new InetSocketAddress(property.getTcpUrl(), property.getPort()));
+                        SessionResource resource = new SessionResource(resourceKey, socket, property, internalQueue,repository);
+
+                        // PropertyDto 와 resource만 등록
+                        if (!registerResourcePropertyDto(resourceKey, property, resource)) {
+
+                            throw new SessionManagerException("[SESSION-MGR] PropertyDto and Session Resource Reigst Failed");
+                        }
+
+                        resource.start();
+
+                    } else {
+
+                        // 최초 실행이며 dbms의 유일한 계정이 경우 duplicateKey는 resource키와 동일함
+                        String duplicateKey = resourceKey + property.getDbName();
+
+                        // repository 생성 -> 마이바티스 pool 생성 로직도 포함 그래서 dto 넘겨줌
                         MessageRepository messageRepository = MessageRepository.createMessageRepository(property);
 
                         if (!messageRepository.commonPing()) {
-                            throw new SessionManagerException("[SESSION-MGR] DB is not Alive");
-                        }
-                        Socket socket = new Socket();
 
-                        if (isDuplicateScheduler(property) != null) {
-                            // 만약 계정의 dto에 url값이 currentlyList 에 있는 dto값과 일치할 경우 해당 계정의 scheduler 인스턴스를 가짐
-                            String duplicateKey = isDuplicateScheduler(property);
-                            DataBaseScheduler scheduler = getScheduler(duplicateKey);
-                            MessageRepository repository = getRepository(duplicateKey);
-
+                            messageRepository.createTable();
                         }
 
+                        // DB에서 select 하는 스케줄러 생성
+                        DataBaseScheduler scheduler = new DataBaseScheduler(duplicateKey, messageRepository, internalQueue);
 
-                        DataBaseScheduler dataBaseScheduler = new DataBaseScheduler(resource);
+                        // Schudler 단독으로 관리하는 매니저에 regist
+                        if (!schedulerManager.registeScheduler(duplicateKey, scheduler)) {
 
-                        manager.registeScheduler(uuid, new DataBaseScheduler(resource));
-
-                        if (!registerResourcePropertyDto(uuid, property, resource)) {
-                            throw new SessionManagerException("[SESSION-MGR] SessionResource Registed Failed");
+                            throw new SessionManagerException("[SESSION-MGR] Scheduler reigster to ScheduleManager Failed");
                         }
-                        if (!registerSchedulerRepository(uuid, scheduler, messageRepository)) {
-                            throw new SessionManagerException("[SESSION-MGR] Session Registed Failed");
+
+                        // 사용할 전송 queue 등록
+                        internalQueue.registSendQueue(duplicateKey);
+
+                        // 한 계정의 정보를 담은 SessionResource 생성
+                        socket.connect(new InetSocketAddress(property.getTcpUrl(), property.getPort()));
+                        SessionResource resource = new SessionResource(resourceKey, socket, property, internalQueue,messageRepository);
+
+                        resource.start();
+                        if (!registerResourcePropertyDto(resourceKey, property, resource)) {
+                            throw new SessionManagerException("[SESSION-MGR] PropertyDto and Session Resource Reigst Failed");
+                        }
+                        if (!registerSchedulerRepository(duplicateKey, scheduler, messageRepository)) {
+//                            throw new SessionManagerException("[SESSION-MGR] Scheduler and Repository Reigst Failed");
                         }
                     }
                 }
             }
         } catch (SessionManagerException e) {
-            log.error("[SESSION-MGR] {} ", e.getReason());
+            log.error(e.getReason());
         } catch (Exception e) {
             e.printStackTrace();
         }
     };
 
     private Runnable resourceManagement = () -> {
-        for (Map.Entry<String, Pair<PropertyDto, SessionResource>> entry : currentlySessionList.entrySet()) {
-            String uuid = entry.getKey();
-            Pair<PropertyDto, SessionResource> pair = entry.getValue();
-            PropertyDto property = pair.getKey();
-            SessionResource resource = pair.getValue();
-
-
-        }
-        for (Map.Entry<String, Pair<DataBaseScheduler, MessageRepository>> entry : schedulerRepositoryList.entrySet()) {
-            String uuid = entry.getKey();
-            Pair<DataBaseScheduler, MessageRepository> pair = entry.getValue();
-            DataBaseScheduler scheduler = pair.getKey();
-            MessageRepository messageRepository = pair.getValue();
-
-
-        }
+//        for (Map.Entry<String, Pair<PropertyDto, SessionResource>> entry : currentlySessionList.entrySet()) {
+//            String uuid = entry.getKey();
+//            Pair<PropertyDto, SessionResource> pair = entry.getValue();
+//            PropertyDto property = pair.getKey();
+//            SessionResource resource = pair.getValue();
+//        }
     };
 
     //    =============================================================================================================================================================================================================
@@ -137,7 +160,12 @@ public class SessionManager {
         Pair<PropertyDto, SessionResource> pair = currentlySessionList.get(key);
         return pair.getKey();
     }
+
     public SessionResource getResource(String key) {
+        // 범용성을 위해 resourceKey로 줄때와 messageUuid로 들어가는 DuplicateKey둘다 받도록 함
+        if (key.length() > 36) {
+            key = key.substring(0, 36);
+        }
         Pair<PropertyDto, SessionResource> pair = currentlySessionList.get(key);
         return pair.getValue();
     }
@@ -167,6 +195,7 @@ public class SessionManager {
             return false;
         }
         schedulerRepositoryList.put(uuid, new Pair<>(scheduler, repository));
+        log.info("[SESSION-MGR] Scheduler and Repository Registed !!");
         return true;
     }
 
@@ -179,16 +208,17 @@ public class SessionManager {
             return false;
         }
         if (currentlySessionList.containsKey(uuid)) {
+
             return false;
         }
         Pair<PropertyDto, SessionResource> pair = currentlySessionList.get(uuid);
-        if (pair == null) {
-            return false;
-        }
         if (pair.getKey().equals(dto) || pair.getValue().equals(resource)) {
+            System.out.println("여기서 걸리나? 확인용 4");
             return false;
         }
+        dto.setUsed(true);
         currentlySessionList.put(uuid, new Pair<>(dto, resource));
+        log.info("[SESSION-MGR] PropertyDto and SessionResource Registed !!");
         return true;
     }
 

@@ -2,9 +2,15 @@ package nanoit.kr.queue;
 
 public interface InternalQueue {
 
-    boolean publish(InternalDataType type, Object obj);
+    void registSendQueue(String key);
 
-    Object subscribe(InternalDataType type) throws InterruptedException;
+    boolean receivePublish(InternalDataType type, Object obj);
+
+    Object receiveSubscribe(InternalDataType type) throws InterruptedException;
+
+    boolean sendPublish(String key,String value);
+
+    String sendSubscribe(String key) throws InterruptedException;
 
     int getInternalQueueSize(InternalDataType type);
 }

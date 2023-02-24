@@ -3,9 +3,7 @@ package nanoit.kr.unclassified;
 import java.text.SimpleDateFormat;
 
 public final class GlobalConstant {
-    // TPS
-    public static String SMS_TPS = "80";
-
+    public static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd H:mm:ss");
 
     // DRIVER
     public static final String POSTGRESQL_DRIVER = "org.postgresql.Driver";
@@ -17,4 +15,8 @@ public final class GlobalConstant {
     // FILE
     public static final String CONFIG_FILE_PATH = System.getProperty("user.dir") + "/config";
     public static final String FILE_FORMAT = ".xml";
+
+    // POLICY
+    public static final int SMS_TPS = 80;
+    public static final long SEND_INTERVAL_MILLIS = 1000;
 }

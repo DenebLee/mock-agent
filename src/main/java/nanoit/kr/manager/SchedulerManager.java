@@ -40,13 +40,14 @@ public class SchedulerManager {
 
     public boolean registeScheduler(String key, DataBaseScheduler dataBaseScheduler) {
         if (key == null || dataBaseScheduler == null) {
-            log.warn("[SCHEDULER_MGR] Request values are null");
+            log.warn("[SCHEDULER-MGR] Request values are null");
             return false;
         }
         if (schedulerManagerMap.containsKey(key) || schedulerManagerMap.containsValue(dataBaseScheduler)) {
-            log.warn("[SCHEDULER_MGR] Request value already contain SchedulerMap");
+            log.warn("[SCHEDULER-MGR] Request value already contain SchedulerMap");
             return false;
         }
+        log.info("[SCHEDULER-MGR] Scheduler regist Complete key : [{}]", key);
         schedulerManagerMap.put(key, dataBaseScheduler);
         return true;
     }
@@ -56,14 +57,11 @@ public class SchedulerManager {
             return false;
         }
         if (!schedulerManagerMap.containsKey(key)) {
-            log.warn("[SCHEDULER_MGR] Request key is not contain SchedulerMap");
+            log.warn("[SCHEDULER-MGR] Request key is not contain SchedulerMap");
             return false;
         }
+        log.info("[SCHEDULER-MGR] Scheduler Unregist Complete key : [{}]",key);
         schedulerManagerMap.remove(key);
         return true;
     }
 }
-
-// 동일 DBMS를 사용하는 계정들은 하나의 스케줄러를 사용
-// 동일한 DBMS를 사용하는 계정에 데이터베이스 이름 같은걸로 key 값
-// 동일한 DBMS

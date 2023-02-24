@@ -5,11 +5,13 @@ import lombok.extern.slf4j.Slf4j;
 import nanoit.kr.db.DatabaseHandler;
 import nanoit.kr.domain.message.Send;
 import nanoit.kr.exception.SelectFailedException;
+import nanoit.kr.queue.InternalQueueImpl;
+import nanoit.kr.repository.MessageRepository;
 import nanoit.kr.service.MessageService;
-import nanoit.kr.session.SessionResource;
 
 import java.util.List;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -18,24 +20,31 @@ public class DataBaseScheduler {
     private final ScheduledExecutorService scheduledExecutorService;
     private final MessageService messageService;
     private final DatabaseHandler databaseHandler;
-    private final SessionResource sessionResource;
+    private final MessageRepository repository;
+    @Getter
+    private final InternalQueueImpl queue;
     @Getter
     private boolean shedulerState = false;
+    private final String key;
 
 
-    public DataBaseScheduler(SessionResource resource) {
+    public DataBaseScheduler(String key, MessageRepository repository, InternalQueueImpl queue) {
+        this.key = key;
+        this.queue = queue;
         this.databaseHandler = new DatabaseHandler();
+        this.repository = repository;
         this.messageService = databaseHandler.getMessageService1();
-        this.sessionResource = resource;
         this.scheduledExecutorService = Executors.newScheduledThreadPool(1);
 
         start();
     }
 
+    // 하나의 스케줄러는 여러개의 계정에 데이터를 보낼 수 있다 .
+
     public void start() {
         scheduledExecutorService.scheduleWithFixedDelay(() -> {
             try {
-                List<Send> selectList = messageService.selectAll(sessionResource.getMessageRepository());
+                List<Send> selectList = messageService.selectAll(repository);
                 for (Send send : selectList) {
                     if (send == null) {
                         throw new SelectFailedException("[SCHEDULER] Data Select from DB Error");
@@ -87,7 +96,8 @@ public class DataBaseScheduler {
         if (send == null) {
             return false;
         }
-        if (sessionResource.getSendFromSchedulerQueue().offer(send)) {
+
+        if (queue.sendPublish(key, send)) {
             log.debug("[SCHEDULER@{}] SELECT DATA FROM TABLE SUCCESS !!! Data Imported : [{}]", sessionResource.getSocket(), send);
             return true;
         }

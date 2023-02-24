@@ -127,11 +127,11 @@
     <update id="send_select_update" parameterType="java.util.List">
         UPDATE agent_tb
         SET selected = '1',
-        send_time = CURRENT_TIMESTAMP,
-        created_at = CURRENT_TIMESTAMP,
-        last_modified_at = CURRENT_TIMESTAMP
+        send_time = now(),
+        created_at = now(),
+        last_modified_at = now()
         WHERE
-        <foreach collection="list" item="item" separator=" OR " open="(" close=")">
+        <foreach collection="list" item="item" separator=",">
             id = #{item.id}
         </foreach>
     </update>
@@ -144,7 +144,6 @@
             #{item}
         </foreach>
         AND selected = '1';
-
     </update>
 
     <update id="send_result_update" parameterType="_long">

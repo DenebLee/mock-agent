@@ -1,6 +1,5 @@
 package nanoit.kr.module;
 
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import nanoit.kr.db.DatabaseHandler;
 import nanoit.kr.domain.entity.SendAckEntity;
@@ -32,12 +31,15 @@ public class Insert extends ModuleProcess {
     public void run() {
         try {
             while (this.flag) {
-                Object object = queue.subscribe(InternalDataType.INSERT);
-                if (object != null && object instanceof InsertMessage) {
+                Object object = queue.receiveSubscribe(InternalDataType.INSERT);
+                if (object == null) {
+                    continue;
+                }
+                if (object instanceof InsertMessage) {
                     InsertMessage message = (InsertMessage) object;
-                    if (messageService.updateReceiveResult(manager.getResource(message.getUuid()).getMessageRepository(), makeMessageEntity(message))) {
-                        log.debug("[INSERT] Receive Message update DB success result - code : [{}]", "1");
-                    }
+//                    if (messageService.updateReceiveResult(manager.getRepository(message.getUuid()), makeMessageEntity(message))) {
+//                        log.debug("[INSERT] Receive Message update DB success result - code : [{}]", "1");
+//                    }
                 }
             }
         } catch (InterruptedException e) {

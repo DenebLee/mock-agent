@@ -22,12 +22,12 @@ public class Mapper extends ModuleProcess {
     public void run() {
         try {
             while (this.flag) {
-                Object object = queue.subscribe(InternalDataType.RECEIVE_MAPPER);
+                Object object = queue.receiveSubscribe(InternalDataType.RECEIVE_MAPPER);
                 if (object != null) {
                     if (object instanceof String) {
                         String message = (String) object;
                         Payload payload = Jackson.getInstance().getObjectMapper().readValue(message, Payload.class);
-                        if (queue.publish(InternalDataType.FILTER, payload)) {
+                        if (queue.receivePublish(InternalDataType.FILTER, payload)) {
                             log.debug("[MAPPER] Message Sent To Filter Success data : [{}]", payload);
                         }
                     }

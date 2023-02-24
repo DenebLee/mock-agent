@@ -41,10 +41,6 @@ public class MessageServiceImpl implements MessageService {
     public List<Send> selectAll(MessageRepository repository) {
         try {
             List<MessageEntity> messageEntities = repository.sendSelectAll();
-            if (messageEntities.isEmpty()) {
-                throw new SelectFailedException("[MSG-SERVICE] No messages found");
-            }
-
             if (!repository.selectedUpdate(messageEntities)) {
                 throw new UpdateFailedException("[MSG-SERVICE] Error in updating messages");
             }

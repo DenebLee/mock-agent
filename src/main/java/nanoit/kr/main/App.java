@@ -7,13 +7,17 @@ import nanoit.kr.module.Filter;
 import nanoit.kr.module.Insert;
 import nanoit.kr.module.Mapper;
 import nanoit.kr.queue.InternalQueueImpl;
+import nanoit.kr.unclassified.GlobalConstant;
 import nanoit.kr.unclassified.InitialSettings;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.UUID;
 
 
 @Slf4j
 public class App {
+
     public static void main(String[] args) {
         try {
             InitialSettings settings = new InitialSettings();
@@ -22,19 +26,21 @@ public class App {
                 log.info("[SYSTEM] Systemfile does not exist in config Folder");
                 settings.makeConfigSettingXmlFile();
             }
-            // list에 add하는 부분 오류나면 시작단계이기에 프로그램 중단되도록
-            if (!settings.addListDtoAndFile()) {
-                System.exit(-1);
-            }
 
             InternalQueueImpl queue = new InternalQueueImpl();
-
             SchedulerManager schedulerMGR = new SchedulerManager();
+
             SessionManager sessionMGR = new SessionManager(schedulerMGR, queue);
 
             new Mapper(getRandomUuid(), queue);
             new Filter(getRandomUuid(), queue, sessionMGR);
             new Insert(getRandomUuid(), queue, sessionMGR);
+
+            System.out.println();
+            System.out.println("==========================================================================================================================================================================================");
+            System.out.println("                                                                    AGENT START " + GlobalConstant.SIMPLE_DATE_FORMAT.format(new Date()));
+            System.out.println("==========================================================================================================================================================================================");
+            System.out.println();
 
             schedulerMGR.start();
             sessionMGR.start();
